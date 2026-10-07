@@ -1,8 +1,8 @@
 # Commands
 
-Nothing can be built or run from this directory yet. It is not a git repository and holds only the
-plan doc. `node`, `npm` and `pnpm` are installed; `lk` is not. See below before concluding
-otherwise.
+Nothing can be built or run from this directory yet. It holds only the plan doc and the notes
+under `docs/agents/`. `node`, `npm`, `pnpm` and `lk` are all installed. See below before
+concluding otherwise.
 
 ## Git workflow
 
@@ -16,7 +16,7 @@ gh pr create --base main
 ```
 
 `gh` 2.102.0 is installed at `/usr/bin/gh`. Never merge a PR, never push to `main`, and never
-commit straight to it. If the repo is not yet a git repository, `git init -b main` creates it.
+commit straight to it.
 
 Commits use the default global identity, `4lch4 <git@4lch4.email>`. No local `user.name` or
 `user.email` needs setting, and overriding it would be wrong. `commit.gpgsign` is already `true`
@@ -49,28 +49,32 @@ Do not add pnpm to PATH by hand. nvm already covers it, and `~/.zshrc` prepends 
 `PATH` whenever that variable is set, so exporting it moves pnpm off the nvm-managed install. The
 store lives at `~/.local/share/pnpm/store/v11`.
 
-## Install the CLI
+## The LiveKit CLI
 
-This box is **Ubuntu 22.04 on x86_64**. The plan doc's `winget install LiveKit.LiveKitCLI` is
-Windows-only — do not run it here. The Linux path is LiveKit's own installer:
+`lk` **2.18.8** is installed at `/usr/local/bin/lk` on this Ubuntu 22.04 x86_64 box. Auth is
+already done: `~/.livekit/cli-config.yaml` holds a linked Cloud project named `on-call`
+(`p_42v9wzl8lon`, `wss://on-call-25femfzo.livekit.cloud`), and it is the CLI's `default_project`.
+That config holds the API key and secret, so it must never be committed.
+
+Check the install with:
 
 ```bash
-sudo apt-get update && sudo apt-get install -y jq   # the installer aborts without jq
-curl -sSL https://get.livekit.io/cli | bash
 lk --version
+lk cloud auth --help
 ```
 
-The installer hard-requires `bash`, `curl`, `sha256sum` and `jq`, and aborts with a clear
-message if any is missing. **`jq` is the one that is missing on this box**, so install it first
-or the install fails immediately. On x86_64 it selects the `amd64` build, installs to
-`/usr/local/bin`, elevates with `sudo` on its own when that directory is not writable, verifies
-the release checksums, and installs shell completions for bash/zsh/fish.
-
-Then authenticate against the LiveKit Cloud project:
+The plan doc's `winget install LiveKit.LiveKitCLI` is Windows-only — do not run it here. On Linux
+the install path is LiveKit's own installer, which requires `bash`, `curl`, `sha256sum` and `jq`,
+selects the `amd64` build, installs to `/usr/local/bin`, and verifies release checksums:
 
 ```bash
-lk cloud auth
+sudo apt-get update && sudo apt-get install -y jq
+curl -sSL https://get.livekit.io/cli | bash
 ```
+
+`lk cloud auth` is interactive and opens a browser, so an agent cannot complete it unattended.
+It is already done, but if it ever needs redoing, hand it to the owner rather than trying to
+drive it.
 
 ## Bootstrap
 

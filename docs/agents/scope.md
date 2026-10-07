@@ -1,6 +1,6 @@
 # Scope
 
-Source of truth: `LiveKit On-Call Voice Agent — Weekend Scope.md` (Oct 7, 2026).
+Source of truth: the plan doc (Oct 7, 2026), local-only and gitignored.
 
 ## The five boxes
 
@@ -11,7 +11,7 @@ resume.
 - [ ] A real phone number reaches the same agent (SIP)
 - [ ] Saying "page me about it" triggers a tool call that posts to Shion and lands in Discord
 - [ ] The worker runs in Docker on the droplet and restarts on its own
-- [ ] A public GitHub repo has a README, architecture diagram, and a 60–90 second demo
+- [ ] A public GitHub repo has a README, architecture diagram, and a 60-90 second demo
       recording
 
 ## Rules
@@ -27,15 +27,15 @@ resume.
 
 Cut from the top down when time runs short.
 
-| Order | Cut | Saves | Consequence |
-| --- | --- | --- | --- |
-| 1 | Open-source contribution | 2–3 h | Mention as in progress only if an issue was opened |
-| 2 | Telnyx trunk | 2 h | Claim "LiveKit SIP telephony", not "SIP trunk integration" |
-| 3 | `getServerDetail` tool | 45 min | None |
-| 4 | Eval test case | 45 min | Drop "tested with LiveKit's eval framework" |
-| 5 | Caller allowlist in code | 30 min | Use a `pin` on the dispatch rule instead, one JSON field |
-| 6 | Observability screenshot and latency number | 45 min | Leave latency out of the bullet |
-| 7 | Custom web frontend | n/a | Never planned; the hosted sandbox or playground is the WebRTC client and still counts |
+| Order | Cut                                         | Saves  | Consequence                                                                           |
+| ----- | ------------------------------------------- | ------ | ------------------------------------------------------------------------------------- |
+| 1     | Open-source contribution                    | 2-3 h  | Mention as in progress only if an issue was opened                                    |
+| 2     | Telnyx trunk                                | 2 h    | Claim "LiveKit SIP telephony", not "SIP trunk integration"                            |
+| 3     | `getServerDetail` tool                      | 45 min | None                                                                                  |
+| 4     | Eval test case                              | 45 min | Drop "tested with LiveKit's eval framework"                                           |
+| 5     | Caller allowlist in code                    | 30 min | Use a `pin` on the dispatch rule instead, one JSON field                              |
+| 6     | Observability screenshot and latency number | 45 min | Leave latency out of the bullet                                                       |
+| 7     | Custom web frontend                         | n/a    | Never planned; the hosted sandbox or playground is the WebRTC client and still counts |
 
 If the Docker deploy on the droplet overruns 90 minutes, do not fall back to a laptop deploy.
 Deploy to LiveKit Cloud with `lk agent create` instead and change the bullet from

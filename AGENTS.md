@@ -3,11 +3,6 @@
 A LiveKit voice agent reachable from a browser or a phone number: ask "is anything broken?",
 and page the owner through Shion on request.
 
-**This repo is a plan, not a codebase.** Not a git repo, no source. It holds
-`LiveKit On-Call Voice Agent — Weekend Scope.md` (authoritative) plus the notes under
-`docs/agents/`. The worker gets scaffolded here later with
-`lk agent init on-call --template agent-starter-node`.
-
 ## Read these before acting
 
 | Doc | Covers |
@@ -53,10 +48,11 @@ Verified 2026-10-07: Ubuntu 22.04.5 x86_64.
 
 - `node`, `npm` and `pnpm` come from nvm, which only `~/.zshrc` loads. In a non-interactive
   shell they do not resolve at all and look uninstalled. Run `source ~/.nvm/nvm.sh` first.
-- Missing tooling: `lk` is not installed, and `jq` is not installed. `jq` is the harder blocker —
-  the LiveKit CLI installer aborts without it, so `sudo apt-get install -y jq` comes first.
-- The plan doc's `winget install LiveKit.LiveKitCLI` is Windows-only. On Linux use
-  `curl -sSL https://get.livekit.io/cli | bash`, then `lk cloud auth`.
+- `lk` 2.18.8 is installed at `/usr/local/bin/lk` and already authenticated to Cloud project
+  `on-call`. `~/.livekit/cli-config.yaml` holds the API key and secret — never commit it.
+- `lk cloud auth` is interactive and browser-based, so an agent cannot redo it unattended.
+- `jq` is **not** installed, which is worth knowing since the LiveKit CLI installer requires it.
+  Any command needing `jq` will fail until `sudo apt-get install -y jq`.
 - Do not run `corepack enable pnpm`; it would shadow the working global pnpm install with a shim.
 - Do not hand-add pnpm to PATH or set `PNPM_HOME`. nvm already covers pnpm, and `~/.zshrc`
   prepends `$PNPM_HOME` to `PATH`, so exporting it moves pnpm off the nvm-managed install.
