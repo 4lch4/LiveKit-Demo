@@ -70,7 +70,10 @@ overrides it, and do not run `git commit` with explicit `--author` or `-c user.n
 
 ## Environment quirks on this box
 
-Verified 2026-10-09: Ubuntu 22.04.5 x86_64.
+Verified 2026-10-10: Ubuntu 26.04.1 LTS x86_64 (codename `resolute`). Upgraded from jammy
+during this project, so some third-party apt sources were parked rather than migrated and are
+still inert: `github-cli.list.disabled`, `hashicorp.list.disabled`, `microsoft-prod.list.disabled`.
+Anything installed via apt that was not in Ubuntu's own archive may be missing or stale.
 
 - `node`, `npm` and `pnpm` come from nvm, which only `~/.zshrc` loads. In a non-interactive
   shell they do not resolve at all and look uninstalled. Run `source ~/.nvm/nvm.sh` first. This

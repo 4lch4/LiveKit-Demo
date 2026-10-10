@@ -61,7 +61,7 @@ store lives at `~/.local/share/pnpm/store/v11`.
 
 ## The LiveKit CLI
 
-`lk` **2.18.8** is installed at `/usr/local/bin/lk` on this Ubuntu 22.04 x86_64 box, which is the
+`lk` **2.18.8** is installed at `/usr/local/bin/lk` on this Ubuntu 26.04 x86_64 box, which is the
 minimum version the starter's debugger and `agentName` features need. Auth is already done:
 `~/.livekit/cli-config.yaml` holds a linked Cloud project named `on-call` (`p_42v9wzl8lon`,
 `wss://on-call-25femfzo.livekit.cloud`), and it is the CLI's `default_project`. That config holds
@@ -75,9 +75,10 @@ lk cloud auth --help
 lk agent list          # agents deployed in the current project
 ```
 
-The plan doc's `winget install LiveKit.LiveKitCLI` is Windows-only — do not run it here. On Linux
-the install path is LiveKit's own installer, which requires `bash`, `curl`, `sha256sum` and `jq`,
-selects the `amd64` build, installs to `/usr/local/bin`, and verifies release checksums:
+The plan doc's `winget install LiveKit.LiveKitCLI` is Windows-only — do not run it here, whatever
+the distro. On Linux the install path is LiveKit's own installer, which requires `bash`, `curl`,
+`sha256sum` and `jq`, selects the `amd64` build, installs to `/usr/local/bin`, and verifies
+release checksums:
 
 ```bash
 sudo apt-get update && sudo apt-get install -y jq
