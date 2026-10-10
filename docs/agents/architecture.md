@@ -10,14 +10,14 @@ call or browser -> room -> dispatch rule requests agentName "on-call"
   -> checkServers | sendAlert -> Shion :3300 -> Discord DM
 ```
 
-| Component | Built from | Your work |
-| --- | --- | --- |
-| Agent worker | `agent-starter-node` on `agents-js` | Instructions, model choices, `agentName`, tools |
-| Health tool | new code | `checkServers` over `HEALTH_TARGETS`, including Shion's `/v1/status` |
-| Alert tool | new code + Shion | `sendAlert` to `${SHION_URL}/v1/messages`, confirm before sending |
-| Phone entry | LiveKit Phone Number + dispatch rule | Buy the number, one JSON rule, caller allowlist |
-| Browser entry | LiveKit sandbox or agents playground | Nothing to build |
-| Deploy | starter Dockerfile + your compose file | Image push, compose service, env file |
+| Component     | Built from                             | Your work                                                            |
+| ------------- | -------------------------------------- | -------------------------------------------------------------------- |
+| Agent worker  | `agent-starter-node` on `agents-js`    | Instructions, model choices, `agentName`, tools                      |
+| Health tool   | new code                               | `checkServers` over `HEALTH_TARGETS`, including Shion's `/v1/status` |
+| Alert tool    | new code + Shion                       | `sendAlert` to `${SHION_URL}/v1/messages`, confirm before sending    |
+| Phone entry   | LiveKit Phone Number + dispatch rule   | Buy the number, one JSON rule, caller allowlist                      |
+| Browser entry | LiveKit sandbox or agents playground   | Nothing to build                                                     |
+| Deploy        | starter Dockerfile + your compose file | Image push, compose service, env file                                |
 
 ## Tools
 

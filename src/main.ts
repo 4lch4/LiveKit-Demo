@@ -1,13 +1,19 @@
 import { ServerOptions, cli, defineAgent, inference, voice } from '@livekit/agents';
 import { EnhancerModel, audioEnhancement } from '@livekit/plugins-ai-coustics';
 import dotenv from 'dotenv';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createAgent } from './agent.ts';
 
 // Load environment variables from a local file.
 // Make sure to set LIVEKIT_URL, LIVEKIT_API_KEY, and LIVEKIT_API_SECRET
 // when running locally or self-hosting your agent server.
-dotenv.config({ path: '.env.local' });
+//
+// Resolved relative to this module, not the process working directory, so the
+// worker finds the same file no matter where it was launched from. A missing
+// file is not an error: in Docker the values come from the real environment and
+// dotenv leaves them untouched.
+dotenv.config({ path: join(import.meta.dirname, '..', '.env.local') });
 
 export default defineAgent({
   entry: async (ctx) => {
