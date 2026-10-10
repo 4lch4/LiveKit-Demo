@@ -22,6 +22,12 @@ jobs:
       LIVEKIT_URL: ${{ secrets.LIVEKIT_URL }}
       LIVEKIT_API_KEY: ${{ secrets.LIVEKIT_API_KEY }}
       LIVEKIT_API_SECRET: ${{ secrets.LIVEKIT_API_SECRET }}
+      # The health scenarios call checkServers for real, so the runner needs
+      # reachable targets. example.com is used because it is stable, public,
+      # and does not depend on this project's infrastructure. Replace with the
+      # real HEALTH_TARGETS from a secret once the server list is settled.
+      HEALTH_TARGETS: >-
+        [{"name":"example.com","url":"https://example.com","expect":"Example Domain"}]
 
     steps:
       - name: Checkout code
@@ -42,4 +48,8 @@ jobs:
         run: curl -sSL https://get.livekit.io/cli | bash
 
       - name: Run simulations
-        run: lk agent simulate text --scenarios scenarios.yaml
+        # scenarios.yaml holds the template's generic assistant cases;
+        # scenarios/ holds ours. Both are run.
+        run: |
+          lk agent simulate text --scenarios scenarios.yaml
+          lk agent simulate text --scenarios scenarios/health-checks.yaml

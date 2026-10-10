@@ -22,15 +22,22 @@ export default defineAgent({
       // Speech-to-text (STT) is your agent's ears, turning the user's speech into text that the LLM can understand
       // See all available models at https://docs.livekit.io/agents/models/stt/
       stt: new inference.STT({
-        model: 'assemblyai/universal-3-6-pro',
+        // Deepgram Nova-3 at roughly $0.0048/min, versus AssemblyAI's rate. The
+        // whole project runs on $2.50 of inference credit, so this is the single
+        // biggest lever on how many test minutes remain. See
+        // docs/agents/architecture.md.
+        model: 'deepgram/nova-3',
         language: 'en',
       }),
 
       // Text-to-speech (TTS) is your agent's voice, turning the LLM's text into speech that the user can hear
       // See all available models as well as voice selections at https://docs.livekit.io/agents/models/tts/
       tts: new inference.TTS({
-        model: 'fishaudio/s2.1-pro',
-        voice: 'fa4c9eb3dccc4806b382b40d61c6b10a',
+        // Rime Mist v3. Free at Build-plan pricing, against roughly $0.008/min
+        // for Fish Audio s2.1-pro. Note that Rime does not declare a markup
+        // dialect, which is why expressive mode is off below.
+        model: 'rime/mistv3',
+        voice: 'astra',
       }),
 
       turnHandling: {
@@ -49,9 +56,16 @@ export default defineAgent({
 
       // Expressive mode injects the TTS provider's markup guide into the LLM prompt, so the model
       // emits inline delivery tags (emotion, pacing, non-verbal sounds) that the TTS renders and
-      // the transcript never shows. Requires a TTS model that supports markup, such as the Fish
-      // Audio model above.
-      expressive: true,
+      // the transcript never shows. It requires a TTS model that declares a markup dialect, and
+      // the supported list is Fish Audio s2.1-pro, Inworld tts-2, Cartesia Sonic, and Gemini
+      // flash tts. Rime is not among them, so this is off while TTS is Rime.
+      // See https://docs.livekit.io/agents/models/tts/expressive/
+      //
+      // Turning this off is the cost of the cheap model set. It also removes a
+      // whole class of failure, since injected markup can reach the transcript
+      // if a provider does not support it. Re-enable it if the TTS moves back
+      // to Fish Audio, and decide then whether it is worth the credit.
+      expressive: false,
     });
 
     // Start the session, which initializes the voice pipeline and warms up the models
