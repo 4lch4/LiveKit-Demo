@@ -3,6 +3,8 @@
 A LiveKit voice agent reachable from a browser or a phone number: ask "is anything broken?",
 and page the owner through Shion on request.
 
+This repo is a workspace: planning notes at the root, and the agent itself in `on-call/`.
+
 ## Read these before acting
 
 | Doc | Covers |
@@ -11,6 +13,28 @@ and page the owner through Shion on request.
 | `docs/agents/architecture.md` | Worker/tool design, model budget, compose + deploy requirements |
 | `docs/agents/commands.md` | Toolchain setup, `lk` install, bootstrap, test, deploy commands |
 | `docs/agents/shion-contract.md` | The exact Shion API the alert tool posts to |
+
+## Inside `on-call/`: defer to the starter
+
+**`on-call/` is upstream LiveKit code, vendored from `livekit-examples/agent-starter-node`.** It
+carries its own `AGENTS.md`, `README.md`, and `.agents/skills/`, and OpenCode loads them whenever
+you touch that directory. Those are authoritative for anything inside `on-call/`:
+
+- **LiveKit agent skills** at `on-call/.agents/skills/` — one per stage (reading docs, building,
+  debugging, testing, writing scenarios, running simulations, operating). They defer to live docs
+  for API details. Read the matching `SKILL.md` before starting that kind of task rather than
+  guessing at an API.
+- **Scenario-first rule.** On any change to instructions, tool descriptions, tasks, workflows, or
+  handoffs, write a scenario in `on-call/scenarios.yaml` first and iterate until it passes. Never
+  guess at what works.
+- **Debugger before done.** After changing agent behavior, exercise it with `lk agent debugger`.
+  Run `lk agent debugger restart` after every code edit; a running session keeps the old code.
+
+This root file covers repo-wide concerns only: scope, the Shion contract, git, and this machine.
+Where the two disagree about the agent's internals, the starter's file wins.
+
+Do not "fix" the starter's files to match our notes. The notes were written before the scaffold
+existed and are the ones that get updated.
 
 ## Git workflow
 
@@ -41,13 +65,16 @@ overrides it, and do not run `git commit` with explicit `--author` or `-c user.n
   Its API already fits the alert tool. If you think Shion needs a change, you have misread the
   contract.
 - Keep `SHION_URL` as a config value; do not hardcode it in the tool.
+- **Never commit `on-call/.env.local`.** It holds live Cloud credentials. The starter's own
+  `.gitignore` already ignores it, so just do not bypass that.
 
 ## Environment quirks on this box
 
-Verified 2026-10-07: Ubuntu 22.04.5 x86_64.
+Verified 2026-10-09: Ubuntu 22.04.5 x86_64.
 
 - `node`, `npm` and `pnpm` come from nvm, which only `~/.zshrc` loads. In a non-interactive
-  shell they do not resolve at all and look uninstalled. Run `source ~/.nvm/nvm.sh` first.
+  shell they do not resolve at all and look uninstalled. Run `source ~/.nvm/nvm.sh` first. This
+  bites before every `pnpm` command in `on-call/`.
 - `lk` 2.18.8 is installed at `/usr/local/bin/lk` and already authenticated to Cloud project
   `on-call`. `~/.livekit/cli-config.yaml` holds the API key and secret — never commit it.
 - `lk cloud auth` is interactive and browser-based, so an agent cannot redo it unattended.
@@ -56,19 +83,28 @@ Verified 2026-10-07: Ubuntu 22.04.5 x86_64.
 - Do not run `corepack enable pnpm`; it would shadow the working global pnpm install with a shim.
 - Do not hand-add pnpm to PATH or set `PNPM_HOME`. nvm already covers pnpm, and `~/.zshrc`
   prepends `$PNPM_HOME` to `PATH`, so exporting it moves pnpm off the nvm-managed install.
-- Use pnpm, not the installed `bun`. Match the starter's own test runner and lint config rather
-  than importing new tooling. Shion uses Biome and `bun test`; that is a different project.
+- Use pnpm, not the installed `bun`. `on-call/.npmrc` sets `engine-strict=true` and its
+  `package.json` requires Node >=24 and pnpm >=10, so a wrong runtime fails the install outright.
+- `pnpm` commands for the agent run from `on-call/`, not the repo root. There is no root manifest.
 
 ## Traps that produce misleading failures
 
-- A local `pnpm run dev` worker left running steals calls from the droplet worker, and routing
-  depends on which worker registered last — so the failure looks random. Stop it before testing
-  the droplet.
+- **`pnpm test` fails in `on-call/` as shipped.** `src/agent.test.ts` is entirely commented out,
+  so vitest exits 1 with "No test suite found". That is the template default, not a regression.
+  Behavioral coverage belongs in `scenarios.yaml` via `lk agent simulate text`. Expect this to
+  look like your change broke the suite when it did not.
+- **The starter's `pnpm run dev` is `lk agent dev`, and it registers with LiveKit Cloud.** A local
+  worker left running steals calls from the droplet worker, and routing depends on which worker
+  registered last, so the failure looks random. Stop it before testing the droplet.
 - Adding an explicit `agentName` dispatch stops rooms from getting an agent automatically, which
   can break the browser path. Reconfigure the sandbox/playground to request the agent by name,
   and retest the browser path after adding the phone number.
-- Inference runs on a $2.50 credit budget, so model choice buys test minutes. The cheap combo in
-  `docs/agents/architecture.md` is roughly 400 minutes; the starter's defaults cost 2.5x more.
+- Inference runs on a $2.50 credit budget, so model choice buys test minutes. The shipped default
+  in `src/agent.ts` is `google/gemma-4-31b-it` with Fish Audio TTS, roughly $0.015/min. The cheap
+  combo in `docs/agents/architecture.md` is about $0.006/min, so roughly 400 minutes of talking.
+  Every simulation run spends real credit too.
+- `lk agent simulate` runs against LiveKit Cloud with real inference, which is why the starter's
+  Simulations workflow is gated to merges on `main` and not run on every push.
 - The phone number is public. Anyone who dials it can trigger a page.
 - The agent and Shion share AICGEN00. Set `mem_limit` in compose so an OOM cannot take Shion
   down.
