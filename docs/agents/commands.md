@@ -4,11 +4,14 @@ The agent lives in `on-call/` and is already scaffolded. The repo root holds onl
 and the local-only plan doc. `node`, `npm`, `pnpm` and `lk` are all installed.
 
 For anything inside `on-call/`, its own `AGENTS.md` and `.agents/skills/` are authoritative and
-take precedence over this file. This one covers setup, the box's toolchain quirks, and deploy.
+take precedence over this file. That directory is our code, created from LiveKit's
+`agent-starter-node` template — so this precedence is about LiveKit APIs and tooling conventions,
+not about ownership. This one covers setup, the box's toolchain quirks, and deploy.
 
 ## Layout
 
-- `on-call/` — the agent, vendored from `livekit-examples/agent-starter-node`. Node/TypeScript,
+- `on-call/` — the agent, our code created from LiveKit's `agent-starter-node` template.
+  Node/TypeScript,
   `pnpm`, vitest + eslint + prettier, `Dockerfile` and `taskfile.yaml` for deploy.
 - `docs/agents/` — these notes.
 
@@ -184,6 +187,7 @@ over this file.
 Image updates go through the existing GitHub Actions SSH deploy, not a manual build on the
 droplet. The compose requirements are in `docs/agents/architecture.md`.
 
-`on-call/Dockerfile` and `on-call/taskfile.yaml` are upstream and unmodified. `lk agent deploy`
+`on-call/Dockerfile` and `on-call/taskfile.yaml` came from the template and are currently unmodified,
+but they are ours to change like anything else in `on-call/`. `lk agent deploy`
 targets LiveKit Cloud; the droplet path is the SSH deploy plus compose. Scope allows falling back
 to `lk agent create` if the droplet work overruns, at the cost of a weaker infra claim.

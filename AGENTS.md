@@ -14,11 +14,16 @@ This repo is a workspace: planning notes at the root, and the agent itself in `o
 | `docs/agents/commands.md` | Toolchain setup, `lk` install, bootstrap, test, deploy commands |
 | `docs/agents/shion-contract.md` | The exact Shion API the alert tool posts to |
 
-## Inside `on-call/`: defer to the starter
+## Inside `on-call/`: our code, the starter's rules
 
-**`on-call/` is upstream LiveKit code, vendored from `livekit-examples/agent-starter-node`.** It
-carries its own `AGENTS.md`, `README.md`, and `.agents/skills/`, and OpenCode loads them whenever
-you touch that directory. Those are authoritative for anything inside `on-call/`:
+**`on-call/` is our code.** It was created from LiveKit's `agent-starter-node` template, so it began
+as a copy of theirs — but it is ours to change. Treat it as our own codebase, not as vendored
+third-party code: edit it freely, and do not avoid changing something because the template shipped
+it that way.
+
+It carries its own `AGENTS.md`, `README.md`, and `.agents/skills/`, and OpenCode loads them whenever
+you touch that directory. Those are the reference for **how to work inside `on-call/`** — read them
+rather than guessing at a LiveKit API or inventing a convention:
 
 - **LiveKit agent skills** at `on-call/.agents/skills/` — one per stage (reading docs, building,
   debugging, testing, writing scenarios, running simulations, operating). They defer to live docs
@@ -31,10 +36,12 @@ you touch that directory. Those are authoritative for anything inside `on-call/`
   Run `lk agent debugger restart` after every code edit; a running session keeps the old code.
 
 This root file covers repo-wide concerns only: scope, the Shion contract, git, and this machine.
-Where the two disagree about the agent's internals, the starter's file wins.
+Where the two disagree about LiveKit's APIs or the agent tooling — model options, `lk` commands,
+session setup — the file inside `on-call/` wins, because it tracks the SDK more closely than a
+note written before the scaffold existed can.
 
-Do not "fix" the starter's files to match our notes. The notes were written before the scaffold
-existed and are the ones that get updated.
+Where the two disagree about **what we are building** — scope, the Shion contract, what goes in the
+resume — this root file wins, and `on-call/` gets updated to match.
 
 ## Git workflow
 
