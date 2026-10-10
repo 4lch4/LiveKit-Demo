@@ -1,22 +1,21 @@
 # Commands
 
-The agent lives in `on-call/` and is already scaffolded. The repo root holds only this doc set
-and the local-only plan doc. `node`, `npm`, `pnpm` and `lk` are all installed.
+The agent is already scaffolded at the repo root, which is the project root. `node`, `npm`, `pnpm`
+and `lk` are all installed.
 
-For anything inside `on-call/`, its own `AGENTS.md` and `.agents/skills/` are authoritative and
-take precedence over this file. That directory is our code, created from LiveKit's
-`agent-starter-node` template — so this precedence is about LiveKit APIs and tooling conventions,
-not about ownership. This one covers setup, the box's toolchain quirks, and deploy.
+The root `AGENTS.md` and `.agents/skills/` came from LiveKit's `agent-starter-node` template and are
+authoritative for LiveKit APIs and agent tooling, ahead of this file. They govern _how_ to work with
+the SDK, not what we are building. This file covers setup, the box's toolchain quirks, and deploy.
 
 ## Layout
 
-- `on-call/` — the agent, our code created from LiveKit's `agent-starter-node` template.
-  Node/TypeScript,
-  `pnpm`, vitest + eslint + prettier, `Dockerfile` and `taskfile.yaml` for deploy.
-- `docs/agents/` — these notes.
+One pnpm project at the repo root — `package.json`, `src/`, `scenarios.yaml`, `Dockerfile`,
+`tsconfig.json`, eslint and prettier config, `.agents/skills/`. Plus:
 
-There is no root `package.json` and no workspace manifest. Every `pnpm` command below runs from
-`on-call/`.
+- `docs/agents/` — these notes, plus `livekit-agent-readme.md` from the template as API reference.
+- `Claudes-Plan.md` — the local-only plan doc, gitignored.
+
+Every `pnpm` and `lk agent` command below runs from the repo root.
 
 ## Git workflow
 
@@ -48,7 +47,7 @@ source ~/.nvm/nvm.sh    # node -v -> v24.19.0, npm -v -> 12.1.0
 ```
 
 Source nvm before running `pnpm install` / `pnpm run dev`, otherwise they fail with "command not
-found" and look like a broken toolchain. `on-call/.nvmrc` pins Node 24 and `.npmrc` sets
+found" and look like a broken toolchain. `.nvmrc` pins Node 24 and `.npmrc` sets
 `engine-strict=true`, so an older runtime fails the install rather than warning.
 
 pnpm 12.10.1 is installed globally under Node v24.19.0, so it sits in
@@ -104,13 +103,13 @@ It clones `livekit-examples/agent-starter-node` into `./on-call`, writes `.env.l
 linked Cloud project, and prints a console URL. Then:
 
 ```bash
-cd on-call
 pnpm install          # ~20s from a warm store
 ```
 
-`on-call/.env.local` holds `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` and `LIVEKIT_URL` for project
-`on-call`. It is gitignored by the starter's own `.gitignore` and must stay that way.
-`.env.example` is the committed template with empty values.
+`.env.local` holds `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` and `LIVEKIT_URL` for project
+`on-call`. It is gitignored and must stay that way. `.env.example` is the committed template with
+empty values. `src/main.ts` resolves it relative to the module rather than the working directory, so
+the worker finds it from any directory.
 
 Talk to it from the LiveKit dashboard's sandbox "Web Voice Agent" app or the agents playground.
 That first WebRTC session is box 1 of the scope.
@@ -127,16 +126,16 @@ docker run --rm --add-host=host.docker.internal:host-gateway curlimages/curl -s 
 
 ## The agent's own commands
 
-From `on-call/`. `dev` is not a plain node process, it is `lk agent dev`, which connects the
+From the repo root. `dev` is not a plain node process, it is `lk agent dev`, which connects the
 worker to LiveKit Cloud.
 
-| Command | What it does |
-| --- | --- |
-| `pnpm run dev` | `lk agent dev`, hot reload, registered with Cloud |
-| `lk agent console` | Talk to it in the terminal, no browser |
-| `lk agent debugger start` / `say` / `restart` / `stop` | Drive text turns, print tool calls |
-| `node src/main.ts start` | Production mode, no reload |
-| `lk agent simulate text --scenarios scenarios.yaml` | Judged conversations against the agent |
+| Command                                                | What it does                                      |
+| ------------------------------------------------------ | ------------------------------------------------- |
+| `pnpm run dev`                                         | `lk agent dev`, hot reload, registered with Cloud |
+| `lk agent console`                                     | Talk to it in the terminal, no browser            |
+| `lk agent debugger start` / `say` / `restart` / `stop` | Drive text turns, print tool calls                |
+| `node src/main.ts start`                               | Production mode, no reload                        |
+| `lk agent simulate text --scenarios scenarios.yaml`    | Judged conversations against the agent            |
 
 `lk agent dev` must be stopped before testing the droplet worker, since two registered workers
 makes call routing depend on registration order and the failure looks random.
@@ -147,7 +146,6 @@ The starter owns the toolchain. Match its scripts rather than importing new tool
 uses Biome and `bun test`, but that is a different project — do not copy it here.
 
 ```bash
-cd on-call
 pnpm run typecheck     # tsc --noEmit
 pnpm run lint          # eslint
 pnpm run format:check  # prettier --check, covers .md too
@@ -165,29 +163,33 @@ Behavior is covered by `scenarios.yaml` instead, judged on LiveKit Cloud:
 lk agent simulate text --scenarios scenarios.yaml
 ```
 
-Per the starter's `AGENTS.md`, write a scenario before changing instructions, tool descriptions,
+Per the root `AGENTS.md`, write a scenario before changing instructions, tool descriptions,
 tasks, workflows, or handoffs, then iterate until it passes. Each run spends real inference
 credit. The shipped file covers greeting, grounding, and guardrails only.
 
-CI in `on-call/.github/workflows/`:
-- `tests.yml` on pull requests: `typecheck`, `lint`, `format:check`
-- `simulations.yml` on merges to `main` only: `lk agent simulate text`
-- `template-check.yml` asserts `pnpm-lock.yaml` and `livekit.toml` are untracked, because the
-  template ships them untracked. We commit `pnpm-lock.yaml` deliberately for reproducible builds,
-  as the starter's README recommends once it is your project. The workflow's grep is anchored to
-  the repo root (`^pnpm-lock.yaml$`) so it does not match `on-call/pnpm-lock.yaml` and passes
-  here, but it is now meaningless. Delete this workflow rather than leaving it looking enforced.
+CI in `.github/workflows/`, at the repo root where GitHub actually reads it:
 
-The starter also ships its own `.agents/skills/` and `.claude/skills/`, plus `CLAUDE.md` and
-`GEMINI.md`. Those are loaded automatically for anything under `on-call/` and take precedence
-over this file.
+- `tests.yml` on pull requests and pushes to `main`: `typecheck`, `lint`, `format:check`. It
+  deliberately omits `pnpm test`, which fails as shipped. Keep it omitted until real tests exist.
+- `simulations.yml` on merges to `main` and on demand: `lk agent simulate text`. Gated off PRs
+  because it spends real inference credit. It needs the `LIVEKIT_URL`, `LIVEKIT_API_KEY` and
+  `LIVEKIT_API_SECRET` repository secrets, which are **not set yet** — it will fail until they are.
+
+The starter's `.agents/skills/` and `.claude/skills/`, plus `CLAUDE.md` and `GEMINI.md`, all live at
+the repo root now and load automatically. They take precedence over this file on LiveKit specifics.
 
 ## Deploy
 
 Image updates go through the existing GitHub Actions SSH deploy, not a manual build on the
 droplet. The compose requirements are in `docs/agents/architecture.md`.
 
-`on-call/Dockerfile` and `on-call/taskfile.yaml` came from the template and are currently unmodified,
-but they are ours to change like anything else in `on-call/`. `lk agent deploy`
-targets LiveKit Cloud; the droplet path is the SSH deploy plus compose. Scope allows falling back
-to `lk agent create` if the droplet work overruns, at the cost of a weaker infra claim.
+`Dockerfile` came from the template and is currently unmodified, but it is ours to change. The
+build context is the repo root:
+
+```bash
+docker build -f Dockerfile -t <image> .
+```
+
+`lk agent deploy` targets LiveKit Cloud; the droplet path is the SSH deploy plus compose. Scope
+allows falling back to `lk agent create` if the droplet work overruns, at the cost of a weaker infra
+claim.

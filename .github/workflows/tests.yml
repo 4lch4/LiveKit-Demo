@@ -21,8 +21,6 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10.15.0 
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -30,7 +28,7 @@ jobs:
           node-version: 24
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Run type checking
         run: pnpm run typecheck
@@ -40,3 +38,8 @@ jobs:
 
       - name: Check formatting
         run: pnpm run format:check
+
+# `pnpm test` is deliberately not run here. `src/agent.test.ts` ships fully
+# commented out, so vitest exits 1 with "No test suite found". Behavioral
+# coverage lives in `scenarios.yaml`, run by simulations.yml. Add this step
+# once real tests exist.

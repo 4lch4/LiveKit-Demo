@@ -3,45 +3,49 @@
 A LiveKit voice agent reachable from a browser or a phone number: ask "is anything broken?",
 and page the owner through Shion on request.
 
-This repo is a workspace: planning notes at the root, and the agent itself in `on-call/`.
+This repo is a single pnpm project: planning notes under `docs/agents/`, the agent at the root.
+`pnpm` and `lk agent` commands all run from the repository root, which is the project root.
 
 ## Read these before acting
 
-| Doc | Covers |
-| --- | --- |
-| `docs/agents/scope.md` | The five boxes, the binding cut list, what is out of scope |
-| `docs/agents/architecture.md` | Worker/tool design, model budget, compose + deploy requirements |
-| `docs/agents/commands.md` | Toolchain setup, `lk` install, bootstrap, test, deploy commands |
-| `docs/agents/shion-contract.md` | The exact Shion API the alert tool posts to |
+| Doc                                   | Covers                                                          |
+| ------------------------------------- | --------------------------------------------------------------- |
+| `docs/agents/scope.md`                | The five boxes, the binding cut list, what is out of scope      |
+| `docs/agents/architecture.md`         | Worker/tool design, model budget, compose + deploy requirements |
+| `docs/agents/commands.md`             | Toolchain setup, `lk` install, bootstrap, test, deploy commands |
+| `docs/agents/shion-contract.md`       | The exact Shion API the alert tool posts to                     |
+| `docs/agents/livekit-agent-readme.md` | Upstream starter README, kept as API reference                  |
 
-## Inside `on-call/`: our code, the starter's rules
+## LiveKit guidance, from the starter
 
-**`on-call/` is our code.** It was created from LiveKit's `agent-starter-node` template, so it began
-as a copy of theirs — but it is ours to change. Treat it as our own codebase, not as vendored
-third-party code: edit it freely, and do not avoid changing something because the template shipped
-it that way.
+The agent started as LiveKit's `agent-starter-node` template, so its `AGENTS.md` and eight stage
+skills came with it. Those still own LiveKit specifics. The skills live at `.agents/skills/` (and
+`.claude/skills/`) and load automatically:
 
-It carries its own `AGENTS.md`, `README.md`, and `.agents/skills/`, and OpenCode loads them whenever
-you touch that directory. Those are the reference for **how to work inside `on-call/`** — read them
-rather than guessing at a LiveKit API or inventing a convention:
+- **LiveKit agent skills** — one per stage (reading docs, building, debugging, testing, writing
+  scenarios, running simulations, operating). They defer to live docs for API details. Read the
+  matching `SKILL.md` before starting that kind of task rather than guessing at an API.
+- **Look up API details, don't recall them.** Run `lk docs` before a docs lookup, or use the
+  [docs MCP server](https://docs.livekit.io/reference/developer-tools/docs-mcp/). Model IDs, CLI
+  flags, and session setup change between SDK releases.
+- **Check Node feature parity.** The Node SDK has most, but not all, of the Python SDK's features.
+  Verify a feature exists before designing around it.
+- **Report gaps.** If LiveKit's docs or tooling let you down, note it and submit it with
+  `lk docs submit-feedback`.
 
-- **LiveKit agent skills** at `on-call/.agents/skills/` — one per stage (reading docs, building,
-  debugging, testing, writing scenarios, running simulations, operating). They defer to live docs
-  for API details. Read the matching `SKILL.md` before starting that kind of task rather than
-  guessing at an API.
+Where the rules below and the skills disagree about LiveKit's APIs or tooling, the skills win —
+they track the SDK more closely. Where they disagree about what we are building, the rules below
+win.
+
+## Before calling agent work done
+
 - **Scenario-first rule.** On any change to instructions, tool descriptions, tasks, workflows, or
-  handoffs, write a scenario in `on-call/scenarios.yaml` first and iterate until it passes. Never
-  guess at what works.
+  handoffs, write a scenario in `scenarios.yaml` first and iterate until it passes. Never guess at
+  what works.
 - **Debugger before done.** After changing agent behavior, exercise it with `lk agent debugger`.
   Run `lk agent debugger restart` after every code edit; a running session keeps the old code.
-
-This root file covers repo-wide concerns only: scope, the Shion contract, git, and this machine.
-Where the two disagree about LiveKit's APIs or the agent tooling — model options, `lk` commands,
-session setup — the file inside `on-call/` wins, because it tracks the SDK more closely than a
-note written before the scaffold existed can.
-
-Where the two disagree about **what we are building** — scope, the Shion contract, what goes in the
-resume — this root file wins, and `on-call/` gets updated to match.
+- **Check the toolchain.** `pnpm run typecheck`, `pnpm run lint`, `pnpm run format` before
+  committing. `pnpm test` is expected to fail; see the traps section.
 
 ## Git workflow
 
@@ -72,8 +76,8 @@ overrides it, and do not run `git commit` with explicit `--author` or `-c user.n
   Its API already fits the alert tool. If you think Shion needs a change, you have misread the
   contract.
 - Keep `SHION_URL` as a config value; do not hardcode it in the tool.
-- **Never commit `on-call/.env.local`.** It holds live Cloud credentials. The starter's own
-  `.gitignore` already ignores it, so just do not bypass that.
+- **Never commit `.env.local`.** It holds live Cloud credentials. The starter's `.gitignore` already
+  ignores it, so just do not bypass that.
 
 ## Environment quirks on this box
 
@@ -84,7 +88,7 @@ Anything installed via apt that was not in Ubuntu's own archive may be missing o
 
 - `node`, `npm` and `pnpm` come from nvm, which only `~/.zshrc` loads. In a non-interactive
   shell they do not resolve at all and look uninstalled. Run `source ~/.nvm/nvm.sh` first. This
-  bites before every `pnpm` command in `on-call/`.
+  bites before every `pnpm` command in the repo.
 - `lk` 2.18.8 is installed at `/usr/local/bin/lk` and already authenticated to Cloud project
   `on-call`. `~/.livekit/cli-config.yaml` holds the API key and secret — never commit it.
 - `lk cloud auth` is interactive and browser-based, so an agent cannot redo it unattended.
@@ -93,16 +97,16 @@ Anything installed via apt that was not in Ubuntu's own archive may be missing o
 - Do not run `corepack enable pnpm`; it would shadow the working global pnpm install with a shim.
 - Do not hand-add pnpm to PATH or set `PNPM_HOME`. nvm already covers pnpm, and `~/.zshrc`
   prepends `$PNPM_HOME` to `PATH`, so exporting it moves pnpm off the nvm-managed install.
-- Use pnpm, not the installed `bun`. `on-call/.npmrc` sets `engine-strict=true` and its
-  `package.json` requires Node >=24 and pnpm >=10, so a wrong runtime fails the install outright.
-- `pnpm` commands for the agent run from `on-call/`, not the repo root. There is no root manifest.
+- Use pnpm, not the installed `bun`. `.npmrc` sets `engine-strict=true` and `package.json`
+  requires Node >=24 and pnpm >=10, so a wrong runtime fails the install outright.
+- `pnpm` and `lk agent` commands all run from the repo root, which is the project root.
 
 ## Traps that produce misleading failures
 
-- **`pnpm test` fails in `on-call/` as shipped.** `src/agent.test.ts` is entirely commented out,
-  so vitest exits 1 with "No test suite found". That is the template default, not a regression.
-  Behavioral coverage belongs in `scenarios.yaml` via `lk agent simulate text`. Expect this to
-  look like your change broke the suite when it did not.
+- **`pnpm test` fails as shipped.** `src/agent.test.ts` is entirely commented out, so vitest exits 1
+  with "No test suite found". That is the template default, not a regression. Behavioral coverage
+  belongs in `scenarios.yaml` via `lk agent simulate text`. Expect this to look like your change
+  broke the suite when it did not.
 - **The starter's `pnpm run dev` is `lk agent dev`, and it registers with LiveKit Cloud.** A local
   worker left running steals calls from the droplet worker, and routing depends on which worker
   registered last, so the failure looks random. Stop it before testing the droplet.

@@ -4,6 +4,9 @@
 # `lk agent simulate text --scenarios scenarios.yaml` locally while iterating.
 name: Simulations
 
+# Requires repository secrets LIVEKIT_URL, LIVEKIT_API_KEY and
+# LIVEKIT_API_SECRET. Until those are set this workflow fails at the first
+# inference call, so check `gh secret list` before trusting a red run here.
 on:
   push:
     branches: [main]
@@ -26,8 +29,6 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10.15.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -35,7 +36,7 @@ jobs:
           node-version: 24
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Install LiveKit CLI
         run: curl -sSL https://get.livekit.io/cli | bash
