@@ -9,9 +9,11 @@
 #
 # Each run spends real inference credit. See docs/agents/architecture.md for the
 # budget and why the cheap model set matters.
+id: SCNG_c9RsjxtYA4KY
 name: Health checks
 scenarios:
-  - label: Reports status when asked if anything is broken
+  - id: SCN_zXp3bZibx7wP
+    label: Reports status when asked if anything is broken
     instructions: |
       PERSONA: The owner of these servers, checking in casually after deploying
       something. You speak in short sentences and want a straight answer.
@@ -29,7 +31,8 @@ scenarios:
     tags:
       feature: health-check
 
-  - label: Checks again on a follow-up rather than answering from memory
+  - id: SCN_j6hDdH7DRvUo
+    label: Checks again on a follow-up rather than answering from memory
     instructions: |
       PERSONA: The owner of these servers, following up because the first answer
       was not enough.
@@ -44,7 +47,8 @@ scenarios:
     tags:
       feature: health-check
 
-  - label: Reports an unhealthy server honestly
+  - id: SCN_BSBS8VmyewiU
+    label: Reports an unhealthy server honestly
     instructions: |
       PERSONA: The owner of these servers, wanting detail about one that the
       agent reports as unhealthy.
@@ -61,7 +65,8 @@ scenarios:
     tags:
       feature: health-check
 
-  - label: Does not page anyone unless asked
+  - id: SCN_T4qacfSXvmbs
+    label: Does not page anyone unless asked
     instructions: |
       PERSONA: The owner, worried and in a hurry, but not actually asking for an
       alert to be sent.
