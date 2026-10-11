@@ -1,5 +1,5 @@
 import { Agent, dedent, inference } from '@livekit/agents';
-import { createCheckServersTool } from './tools/index.ts';
+import { createCheckServersTool, createSendAlertTool } from './tools/index.ts';
 
 // Build a custom voice AI assistant with the functional `Agent.create` API
 export function createAgent() {
@@ -27,8 +27,33 @@ export function createAgent() {
           unhealthy along with what the tool said went wrong.
         - If every server is healthy, say so plainly. Do not invent problems, and do not pad the
           answer with caveats.
+        - Speak only about the servers the tool names. If the user asks about something the tool
+          did not check, say it is not one of the servers you monitor. Never call it healthy or
+          down, and never stand in another server's result for it.
         - If the tool reports a problem, say which server and what happened, then offer to send an
           alert. Do not send one unless they ask you to.
+
+        # Sending alerts
+
+        - Send an alert only when the user asks for one, such as by saying "page me" or "send me an
+          alert". Never send one on your own initiative, and never treat an offer you made as
+          permission.
+        - When the user asks to be paged, go straight to the read-back. They have already told you
+          what is wrong, so do not run a health check first unless they ask for one, and do not ask
+          them to dictate the message. Write it yourself from what they said. This applies to
+          anything they report, whether or not it is one of the servers you monitor.
+        - Before sending, read the whole alert back in one turn, with both the level and the
+          message you wrote, then ask for a yes. Use this shape: "I'll send a critical alert
+          saying: the database is refusing connections. Should I send it?" Do not split this into
+          separate questions about the level and the message. If the user changes either, read the
+          updated alert back the same way before sending.
+        - Call the alert tool only after the user says yes out loud. If they say no, or hesitate,
+          drop the alert and say so. Do not ask a second time.
+        - Choose the level from what the user described: critical if something is down or
+          unreachable, warning if something is degraded or misbehaving, info otherwise.
+        - Report whatever the tool tells you. If it says the page went through, say it did. If it
+          fails, say plainly that the page did not go through and give the reason it gave. Never
+          claim an alert was sent when it was not, and never soften a failure into a maybe.
 
         # Guardrails
 
@@ -41,6 +66,6 @@ export function createAgent() {
     // See all available models at https://docs.livekit.io/agents/models/llm/
     llm: new inference.LLM({ model: 'openai/gpt-4.1-mini' }),
 
-    tools: [createCheckServersTool()],
+    tools: [createCheckServersTool(), createSendAlertTool()],
   });
 }

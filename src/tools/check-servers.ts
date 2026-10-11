@@ -1,6 +1,7 @@
 import type { HealthCheckResult, HealthTarget } from '../config.ts';
 
-const USER_AGENT = 'on-call-agent/1.0 (+livekit-agents)';
+/** Shared with the alert tool so both integrations identify themselves the same way. */
+export const USER_AGENT = 'on-call-agent/1.0 (+livekit-agents)';
 
 /**
  * Checks a single target. Never throws: every failure mode becomes an unhealthy

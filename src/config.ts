@@ -42,11 +42,12 @@ export interface HealthSummary {
 }
 
 /**
- * Parses `HEALTH_TARGETS`, the `SHION_URL` base, and a Shion bearer token out
- * of the environment.
+ * Parses `HEALTH_TARGETS` out of the environment.
  *
  * `HEALTH_TARGETS` is read fresh on every call rather than cached, so a config
- * change does not require a worker restart in development.
+ * change does not require a worker restart in development. Shion's URL and token
+ * are loaded separately, so paging still works when the health targets are
+ * missing or malformed.
  */
 export function loadHealthConfig(env: NodeJS.ProcessEnv = process.env) {
   const raw = env.HEALTH_TARGETS;
@@ -76,11 +77,36 @@ export function loadHealthConfig(env: NodeJS.ProcessEnv = process.env) {
     return result.data;
   });
 
-  return {
-    targets,
-    shionUrl: env.SHION_URL,
-    shionApiToken: env.SHION_API_TOKEN,
-  };
+  return { targets };
 }
 
 export type HealthConfig = ReturnType<typeof loadHealthConfig>;
+
+/**
+ * Reads the Shion base URL and bearer token out of the environment. Both are
+ * required to send an alert; neither is hardcoded, so moving Shion is a config
+ * change rather than a code change.
+ */
+export function loadShionConfig(env: NodeJS.ProcessEnv = process.env) {
+  const url = env.SHION_URL?.trim();
+  if (!url) {
+    throw new Error('SHION_URL is not set. It must be the base URL of the Shion API.');
+  }
+
+  const apiToken = env.SHION_API_TOKEN?.trim();
+  if (!apiToken) {
+    throw new Error("SHION_API_TOKEN is not set. It must match Shion's API_TOKEN.");
+  }
+
+  // Validated rather than trusted, so a typo surfaces as a clear config error
+  // instead of a confusing "failed to fetch" at send time.
+  try {
+    new URL(url);
+  } catch {
+    throw new Error(`SHION_URL is not a valid URL: ${url}`);
+  }
+
+  return { url, apiToken };
+}
+
+export type ShionConfig = ReturnType<typeof loadShionConfig>;
