@@ -224,9 +224,33 @@ registered `on-call` workers make call routing look random.
 ### 4. Verify it restarts on its own
 
 ```bash
-docker kill --signal=KILL $(docker compose ps -q agent)
-sleep 10 && docker compose ps               # back to "Up", with a fresh "registered worker" log
+# Simulate a crash by killing the worker from the host. Not `docker kill`: Docker records that as a
+# manual stop, and `unless-stopped` deliberately does not restart manually stopped containers.
+sudo kill -9 $(docker inspect -f '{{.State.Pid}}' $(docker compose ps -q agent))
+sleep 15 && docker compose ps               # "Up" again, a few seconds old
+docker inspect -f '{{.RestartCount}}' $(docker compose ps -q agent)   # incremented
+docker compose logs --since 30s agent | grep "registered worker"
 ```
+
+Then check the container can reach Shion through `host.docker.internal`. A 401 is a pass here:
+it proves the network path, and the real token is only sent by the tools.
+
+```bash
+docker compose exec agent node -e "fetch('http://host.docker.internal:3300/v1/status').then(r => console.log(r.status))"
+```
+
+### 5. Verify a browser session reaches the droplet (workstation)
+
+The worker sets `agentName`, so rooms do not get an agent automatically. Mint a token that
+dispatches it when the room is created, and open LiveKit Meet with it. Use a fresh room name each
+time, since token dispatch only fires on room creation.
+
+```bash
+lk token create --project on-call --join --identity owner --room "demo-$(date +%s)" \
+  --agent on-call --valid-for 30m --open meet
+```
+
+On the droplet, `docker compose logs -f agent` shows `received job request` when the agent joins.
 
 A `docker compose stop` exits with code 143 and logs nothing at the default level. That is the
 SDK's normal SIGTERM path (drain, then `process.exit(143)`), not a crash.
