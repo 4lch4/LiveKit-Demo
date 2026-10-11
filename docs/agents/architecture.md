@@ -27,10 +27,13 @@ Define both with `llm.tool` + zod.
   carry a name, a URL, and an expected status. Checks them in parallel with a 3-second timeout each
   and returns a compact summary meant to be spoken, e.g. "4 of 5 healthy; Shion API timed out".
   Entries need an optional `headers` field so the Shion target can send its bearer token. **Done.**
-- **`sendAlert`** — zod params `level` (`info` / `warning` / `critical`) and `text` (max 2,000
-  chars). POSTs `{ source: "on-call-agent", level, text }` to `${SHION_URL}/v1/messages` with
-  the bearer token and a 5-second timeout, mapping 401, 422 and 502 to short spoken errors.
-  **Not built yet.**
+- **`sendAlert`** — built, in `src/tools/`. Zod params `level` (`info` / `warning` / `critical`,
+  defaulting to `info` like Shion) and `text` (max 2,000 chars). POSTs
+  `{ source: "on-call-agent", level, text }` to `${SHION_URL}/v1/messages` with the bearer token
+  and a 5-second timeout, treating only a 200 carrying `"status":"delivered"` as a delivery.
+  401, 422 and 502 each map to a short spoken error. `SHION_URL` and `SHION_API_TOKEN` load
+  through their own `loadShionConfig`, so paging works even when `HEALTH_TARGETS` is unset.
+  **Done.**
 - **`getServerDetail`** — optional follow-up tool for "what's wrong with Shion?": status code,
   latency, last error. Cut first if time is short; see `scope.md`.
 
