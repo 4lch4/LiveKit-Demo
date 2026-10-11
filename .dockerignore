@@ -36,6 +36,10 @@ coverage/
 .vscode/
 .DS_Store
 
+# Local-only planning notes. Gitignored too, but .dockerignore is separate, and
+# without this line the private plan ships inside a public image.
+Claudes-Plan.md
+
 # Project docs and misc
 README.md
 CONTRIBUTING.md
