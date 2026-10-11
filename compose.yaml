@@ -22,9 +22,10 @@ services:
     # container, which Linux Docker does not provide by default.
     extra_hosts:
       - 'host.docker.internal:host-gateway'
-    # The agent shares AICGEN00 with Shion. A cap means an OOM kills this
-    # container, not the host's other services. Revisit after watching
-    # `docker stats` during a real call.
-    mem_limit: 1g
+    # The agent shares AICGEN00 (2 GB, about 800 MiB free) with Shion. Kept at
+    # or below what the host has free, so an OOM kills this container rather
+    # than the host's other services. Measured ~515 MiB idle and ~630 MiB with
+    # one job; see docs/agents/architecture.md.
+    mem_limit: 800m
     # No ports: the worker dials out to LiveKit Cloud over a WebSocket, so
     # nothing needs to reach it from outside.

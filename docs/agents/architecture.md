@@ -84,13 +84,25 @@ Image `4lch4/on-call-agent` on Docker Hub, `compose.yaml` (repo root) and `.env`
   `drainTimeout` to 9.5 minutes, so the worker finishes draining before Docker's SIGKILL; the
   SDK default is an hour.
 - `extra_hosts: ["host.docker.internal:host-gateway"]`
-- `mem_limit: 1g`, so the agent cannot starve Shion on the shared droplet
+- `mem_limit: 800m`, so the agent cannot starve Shion on the shared droplet
 - no published ports; the worker only dials out
 
-**Memory.** Measured 2026-10-11 on the local image: about 805 MiB idle with the SDK's production
-default of four pre-warmed job processes (~170 MiB each), about 480 MiB with
-`numIdleProcesses: 1`, which `src/main.ts` now sets. That leaves roughly 500 MiB of headroom for
-a call under the 1 GiB cap. Confirm with `docker stats` during the first real call.
+**Memory.** Measured 2026-10-11 on the image, uncapped:
+
+| State                                                         | Container memory |
+| ------------------------------------------------------------- | ---------------- |
+| Idle, SDK default of four pre-warmed job processes            | ~805 MiB         |
+| Idle, `numIdleProcesses: 1` (what `src/main.ts` sets)         | ~515 MiB         |
+| One job via `lk dispatch create`, greeting spoken, no speaker | ~630 MiB         |
+
+A job takes the warm process and the SDK spawns a replacement, which is most of the jump. A real
+call adds audio and noise cancellation on top, so plan for 700–750 MiB at peak.
+
+AICGEN00 is a 2 GB droplet with about 800 MiB available and, before this project, no swap. The
+cap is 800m, at or below what the host has free, so a runaway agent is killed by its own cgroup
+(and restarted) instead of the host OOM killer picking Shion or another service. A 2 GB swapfile
+on the host (`vm.swappiness=10`) absorbs spikes. Confirm with `docker stats` during the first
+real call, and resize the droplet if a call gets near the cap.
 
 The build context is the repo root. The Dockerfile pins pnpm to the `packageManager` version and
 copies `pnpm-workspace.yaml` before installing, since that file holds the `allowBuilds`

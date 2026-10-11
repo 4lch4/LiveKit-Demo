@@ -215,7 +215,7 @@ cd /mnt/volume_apps/apps/on-call
 docker compose pull                         # pin a build with AGENT_TAG=<sha> in .env, else latest
 docker compose up -d
 docker compose logs --tail 20 agent         # expect "registered worker" with agentName "on-call"
-docker stats --no-stream                    # expect roughly 480 MiB idle against the 1 GiB cap
+docker stats --no-stream                    # expect roughly 515 MiB idle against the 800 MiB cap
 ```
 
 Stop any local worker first (`lk agent dev`, `lk agent debugger`, a local container). Two
