@@ -44,8 +44,8 @@ win.
   what works.
 - **Debugger before done.** After changing agent behavior, exercise it with `lk agent debugger`.
   Run `lk agent debugger restart` after every code edit; a running session keeps the old code.
-- **Check the toolchain.** `pnpm run typecheck`, `pnpm run lint`, `pnpm run format` before
-  committing. `pnpm test` is expected to fail; see the traps section.
+- **Check the toolchain.** `pnpm run check` (Biome, same lint and format rules CI enforces) and
+  `pnpm run typecheck` before committing. `pnpm test` is expected to fail; see the traps section.
 
 ## Git workflow
 

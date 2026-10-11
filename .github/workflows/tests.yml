@@ -33,11 +33,8 @@ jobs:
       - name: Run type checking
         run: pnpm run typecheck
 
-      - name: Run linter
-        run: pnpm run lint
-
-      - name: Check formatting
-        run: pnpm run format:check
+      - name: Lint and format
+        run: pnpm run check
 
 # `pnpm test` is deliberately not run here. `src/agent.test.ts` ships fully
 # commented out, so vitest exits 1 with "No test suite found". Behavioral

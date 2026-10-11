@@ -1,4 +1,4 @@
-import { Agent, dedent, inference } from '@livekit/agents';
+import { Agent, dedent, inference } from '@livekit/agents'
 
 // Build a custom voice AI assistant with the functional `Agent.create` API
 export function createAgent() {
@@ -75,5 +75,5 @@ export function createAgent() {
     //     },
     //   }),
     // ],
-  });
+  })
 }

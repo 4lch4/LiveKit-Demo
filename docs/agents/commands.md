@@ -10,7 +10,7 @@ the SDK, not what we are building. This file covers setup, the box's toolchain q
 ## Layout
 
 One pnpm project at the repo root — `package.json`, `src/`, `scenarios.yaml`, `Dockerfile`,
-`tsconfig.json`, eslint and prettier config, `.agents/skills/`. Plus:
+`tsconfig.json`, `biome.json`, `.agents/skills/`. Plus:
 
 - `docs/agents/` — these notes, plus `livekit-agent-readme.md` from the template as API reference.
 - `Claudes-Plan.md` — the local-only plan doc, gitignored.
@@ -142,20 +142,30 @@ makes call routing depend on registration order and the failure looks random.
 
 ## Verifying a change
 
-The starter owns the toolchain. Match its scripts rather than importing new tooling. Shion's repo
-uses Biome and `bun test`, but that is a different project — do not copy it here.
+Biome handles both linting and formatting here, matching `4lch4/Shion`. The starter's eslint and
+prettier configs were removed in its favour. Keep the test runner the starter ships (`vitest`), not
+Shion's `bun test` — this project stays on pnpm.
 
 ```bash
 pnpm run typecheck     # tsc --noEmit
-pnpm run lint          # eslint
-pnpm run format:check  # prettier --check, covers .md too
+pnpm run check         # biome ci, what CI runs
+pnpm run lint          # biome lint
+pnpm run format:check  # biome format
 pnpm test              # vitest --run
 ```
 
-Typecheck, lint and format:check all pass clean as scaffolded. **`pnpm test` fails**, exiting 1
-with `No test suite found in src/agent.test.ts` — that file ships fully commented out, including
-an example eval that would judge turns with `openai/gpt-4.1-mini`. This is the template default,
-not a local regression. Ignore it until real tests exist, and do not mistake it for a broken change.
+`pnpm run check` is the one that matters before committing, or use `pnpm exec biome check --write`
+to fix in place.
+
+Biome covers `.ts` and `.json` only. It ships no Markdown or YAML formatter, so unlike the eslint
+and prettier setup it replaced, it no longer checks `.md` or `.yml` — `biome.json` still lists those
+globs so they start working if Biome adds support. `.agents/` and `.claude/` are excluded from
+Biome, since those files are synced from the starter.
+
+Typecheck and Biome both pass clean. **`pnpm test` fails**, exiting 1 with `No test suite found in
+src/agent.test.ts` — that file ships fully commented out, including an example eval that would judge
+turns with `openai/gpt-4.1-mini`. This is the template default, not a local regression. Ignore it
+until real tests exist, and do not mistake it for a broken change.
 
 Behavior is covered by `scenarios.yaml` instead, judged on LiveKit Cloud:
 
@@ -169,7 +179,7 @@ credit. The shipped file covers greeting, grounding, and guardrails only.
 
 CI in `.github/workflows/`, at the repo root where GitHub actually reads it:
 
-- `tests.yml` on pull requests and pushes to `main`: `typecheck`, `lint`, `format:check`. It
+- `tests.yml` on pull requests and pushes to `main`: `typecheck` and `check` (Biome). It
   deliberately omits `pnpm test`, which fails as shipped. Keep it omitted until real tests exist.
 - `simulations.yml` on merges to `main` and on demand: `lk agent simulate text`. Gated off PRs
   because it spends real inference credit. It needs the `LIVEKIT_URL`, `LIVEKIT_API_KEY` and

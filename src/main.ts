@@ -1,9 +1,9 @@
-import { ServerOptions, cli, defineAgent, inference, voice } from '@livekit/agents';
-import { EnhancerModel, audioEnhancement } from '@livekit/plugins-ai-coustics';
-import dotenv from 'dotenv';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { createAgent } from './agent.ts';
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { cli, defineAgent, inference, ServerOptions, voice } from '@livekit/agents'
+import { audioEnhancement, EnhancerModel } from '@livekit/plugins-ai-coustics'
+import dotenv from 'dotenv'
+import { createAgent } from './agent.ts'
 
 // Load environment variables from a local file.
 // Make sure to set LIVEKIT_URL, LIVEKIT_API_KEY, and LIVEKIT_API_SECRET
@@ -13,10 +13,10 @@ import { createAgent } from './agent.ts';
 // worker finds the same file no matter where it was launched from. A missing
 // file is not an error: in Docker the values come from the real environment and
 // dotenv leaves them untouched.
-dotenv.config({ path: join(import.meta.dirname, '..', '.env.local') });
+dotenv.config({ path: join(import.meta.dirname, '..', '.env.local') })
 
 export default defineAgent({
-  entry: async (ctx) => {
+  entry: async ctx => {
     // Set up a voice AI pipeline using AssemblyAI, Fish Audio, and the LiveKit turn detector
     const session = new voice.AgentSession({
       // Speech-to-text (STT) is your agent's ears, turning the user's speech into text that the LLM can understand
@@ -52,7 +52,7 @@ export default defineAgent({
       // the transcript never shows. Requires a TTS model that supports markup, such as the Fish
       // Audio model above.
       expressive: true,
-    });
+    })
 
     // Start the session, which initializes the voice pipeline and warms up the models
     await session.start({
@@ -63,7 +63,7 @@ export default defineAgent({
         // Works for both WebRTC and telephony (SIP) participants
         noiseCancellation: audioEnhancement({ model: EnhancerModel.QuailVfS }),
       },
-    });
+    })
 
     // // Add a virtual avatar to the session, if desired
     // // For other providers, see https://docs.livekit.io/agents/models/avatar/
@@ -77,14 +77,14 @@ export default defineAgent({
     // await avatar.start(session, ctx.room);
 
     // Join the room and connect to the user
-    await ctx.connect();
+    await ctx.connect()
 
     // Greet the user on joining
     session.generateReply({
       instructions: 'Greet the user in a helpful and friendly manner.',
-    });
+    })
   },
-});
+})
 
 // Run the agent server
 cli.runApp(
@@ -92,4 +92,4 @@ cli.runApp(
     agent: fileURLToPath(import.meta.url),
     agentName: 'on-call',
   }),
-);
+)
