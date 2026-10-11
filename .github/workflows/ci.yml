@@ -1,4 +1,4 @@
-name: Tests
+name: CI
 
 on:
   push:
@@ -38,8 +38,3 @@ jobs:
 
       - name: Check formatting
         run: pnpm run format:check
-
-# `pnpm test` is deliberately not run here. `src/agent.test.ts` ships fully
-# commented out, so vitest exits 1 with "No test suite found". Behavioral
-# coverage lives in `scenarios.yaml`, run by simulations.yml. Add this step
-# once real tests exist.
