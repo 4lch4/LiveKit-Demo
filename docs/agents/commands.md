@@ -180,16 +180,56 @@ the repo root now and load automatically. They take precedence over this file on
 
 ## Deploy
 
-Image updates go through the existing GitHub Actions SSH deploy, not a manual build on the
-droplet. The compose requirements are in `docs/agents/architecture.md`.
+Deploys are manual for now: build and push from a workstation, then pull on the droplet. The
+compose requirements and the reasoning behind them are in `docs/agents/architecture.md`.
 
-`Dockerfile` came from the template and is currently unmodified, but it is ours to change. The
-build context is the repo root:
+### 1. Build and push (workstation, repo root)
 
 ```bash
-docker build -f Dockerfile -t <image> .
+docker login -u 4lch4                      # once; use a Docker Hub access token
+TAG=$(git rev-parse --short HEAD)
+docker build --platform linux/amd64 -t 4lch4/on-call-agent:$TAG -t 4lch4/on-call-agent:latest .
+docker push 4lch4/on-call-agent:$TAG
+docker push 4lch4/on-call-agent:latest
 ```
 
-`lk agent deploy` targets LiveKit Cloud; the droplet path is the SSH deploy plus compose. Scope
-allows falling back to `lk agent create` if the droplet work overruns, at the cost of a weaker infra
-claim.
+Build from a clean checkout of `main`, so the image matches what was merged.
+
+### 2. Put the config on the droplet (first deploy, or when either file changes)
+
+```bash
+ssh aicgen00 'mkdir -p /mnt/volume_apps/apps/on-call'
+scp compose.yaml aicgen00:/mnt/volume_apps/apps/on-call/compose.yaml
+```
+
+Create `/mnt/volume_apps/apps/on-call/.env` on the droplet from `.env.example`, with
+`chmod 600`. Use the real `LIVEKIT_*` values, `SHION_URL=http://host.docker.internal:3300`, the
+same `SHION_API_TOKEN` as Shion's `API_TOKEN`, and the real `HEALTH_TARGETS`. Compose's
+`env_file` strips quotes like dotenv does; `docker run --env-file` does **not**, so a quoted
+`LIVEKIT_URL` breaks a plain `docker run` with only "closing worker due to error."
+
+### 3. Start or update (droplet)
+
+```bash
+cd /mnt/volume_apps/apps/on-call
+docker compose pull                         # pin a build with AGENT_TAG=<sha> in .env, else latest
+docker compose up -d
+docker compose logs --tail 20 agent         # expect "registered worker" with agentName "on-call"
+docker stats --no-stream                    # expect roughly 480 MiB idle against the 1 GiB cap
+```
+
+Stop any local worker first (`lk agent dev`, `lk agent debugger`, a local container). Two
+registered `on-call` workers make call routing look random.
+
+### 4. Verify it restarts on its own
+
+```bash
+docker kill --signal=KILL $(docker compose ps -q agent)
+sleep 10 && docker compose ps               # back to "Up", with a fresh "registered worker" log
+```
+
+A `docker compose stop` exits with code 143 and logs nothing at the default level. That is the
+SDK's normal SIGTERM path (drain, then `process.exit(143)`), not a crash.
+
+`lk agent deploy` targets LiveKit Cloud and is not the droplet path. Scope allows falling back to
+`lk agent create` if the droplet work overruns, at the cost of a weaker infra claim.

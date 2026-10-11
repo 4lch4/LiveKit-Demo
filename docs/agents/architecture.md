@@ -76,23 +76,30 @@ stay tailnet-only. Reaching Shion from inside the agent container needs
 
 ## Deploy
 
-Starter Dockerfile, image pushed to Docker Hub, compose file and `.env` at
+Image `4lch4/on-call-agent` on Docker Hub, `compose.yaml` (repo root) and `.env` at
 `/mnt/volume_apps/apps/on-call` on AICGEN00:
 
 - `restart: unless-stopped`
-- `stop_grace_period: 10m` so live calls finish on redeploy
+- `stop_grace_period: 10m` so live calls finish on redeploy. `src/main.ts` sets the SDK's
+  `drainTimeout` to 9.5 minutes, so the worker finishes draining before Docker's SIGKILL; the
+  SDK default is an hour.
 - `extra_hosts: ["host.docker.internal:host-gateway"]`
-- `mem_limit` set, so the agent cannot starve Shion on the shared droplet
-- optionally map the health check on 8081 to the tailnet only
+- `mem_limit: 1g`, so the agent cannot starve Shion on the shared droplet
+- no published ports; the worker only dials out
 
-The build context is the repo root, since `package.json` and `pnpm-lock.yaml` now live there:
+**Memory.** Measured 2026-10-11 on the local image: about 805 MiB idle with the SDK's production
+default of four pre-warmed job processes (~170 MiB each), about 480 MiB with
+`numIdleProcesses: 1`, which `src/main.ts` now sets. That leaves roughly 500 MiB of headroom for
+a call under the 1 GiB cap. Confirm with `docker stats` during the first real call.
 
-```bash
-docker build -f Dockerfile -t <image> .
-```
+The build context is the repo root. The Dockerfile pins pnpm to the `packageManager` version and
+copies `pnpm-workspace.yaml` before installing, since that file holds the `allowBuilds`
+approvals pnpm needs for `@livekit/local-inference`.
 
-Reuse the GitHub Actions SSH deploy that Shion already uses, so the agent redeploys the same
-way instead of being a manual build on the droplet.
+**Deploy is manual for now.** The plan was to reuse Shion's pipeline, but Shion has no SSH
+deploy: it publishes images on release-please tags and relies on WUD on the droplet to pull them,
+and that path is not currently working. The manual runbook is in `docs/agents/commands.md`. An
+automated publish is a possible follow-up, not a scope item.
 
 ## Traps
 

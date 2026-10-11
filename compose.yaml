@@ -1,0 +1,30 @@
+# Pinned so the project, and so the container names, match whether this runs
+# from the repo checkout or from /mnt/volume_apps/apps/on-call on the droplet.
+name: on-call
+
+services:
+  agent:
+    image: 4lch4/on-call-agent:${AGENT_TAG:-latest}
+    # `build:` is for local development. On the droplet there is no source, and
+    # Compose only reaches for the build context on an explicit `build` or
+    # `--build`, so this block is inert there and `up` pulls from the registry.
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    restart: unless-stopped
+    # A redeploy sends SIGTERM and waits this long before SIGKILL, so a call in
+    # progress can finish instead of being cut off mid-sentence.
+    stop_grace_period: 10m
+    # Shion runs on the same host and publishes :3300 there. This name lets
+    # SHION_URL=http://host.docker.internal:3300 reach it from inside the
+    # container, which Linux Docker does not provide by default.
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    # The agent shares AICGEN00 with Shion. A cap means an OOM kills this
+    # container, not the host's other services. Revisit after watching
+    # `docker stats` during a real call.
+    mem_limit: 1g
+    # No ports: the worker dials out to LiveKit Cloud over a WebSocket, so
+    # nothing needs to reach it from outside.

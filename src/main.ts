@@ -105,5 +105,12 @@ cli.runApp(
   new ServerOptions({
     agent: fileURLToPath(import.meta.url),
     agentName: 'on-call',
+    // Production pre-warms four job processes at roughly 170 MB each. This is a
+    // one-call demo sharing a droplet with Shion, so one warm process is plenty.
+    // Zero is not an option: the SDK treats it as unset and uses the default.
+    numIdleProcesses: 1,
+    // The SDK waits up to an hour for live calls on shutdown, but compose.yaml
+    // gives the container 10 minutes before SIGKILL. Finish draining inside it.
+    drainTimeout: 9.5 * 60 * 1000,
   }),
 );
