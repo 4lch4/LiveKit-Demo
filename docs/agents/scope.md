@@ -7,10 +7,10 @@ Source of truth: the plan doc (Oct 7, 2026), local-only and gitignored.
 Each box is one resume claim. If a box is not verified, the matching claim stays off the
 resume.
 
-- [ ] A browser (WebRTC) session is answered with live health data
+- [x] A browser (WebRTC) session is answered with live health data
 - [ ] A real phone number reaches the same agent (SIP)
-- [ ] Saying "page me about it" triggers a tool call that posts to Shion and lands in Discord
-- [ ] The worker runs in Docker on the droplet and restarts on its own
+- [x] Saying "page me about it" triggers a tool call that posts to Shion and lands in Discord
+- [x] The worker runs in Docker on the droplet and restarts on its own
 - [ ] A public GitHub repo has a README, architecture diagram, and a 60-90 second demo
       recording
 
