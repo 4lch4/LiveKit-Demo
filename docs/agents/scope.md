@@ -10,7 +10,7 @@ resume.
 - [x] A browser (WebRTC) session is answered with live health data
 - [ ] A real phone number reaches the same agent (SIP)
 - [x] Saying "page me about it" triggers a tool call that posts to Shion and lands in Discord
-- [ ] The worker runs in Docker on the droplet and restarts on its own
+- [x] The worker runs in Docker on the droplet and restarts on its own
 - [ ] A public GitHub repo has a README, architecture diagram, and a 60-90 second demo
       recording
 
