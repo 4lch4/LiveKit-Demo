@@ -1,10 +1,11 @@
 # Architecture
 
-One Node.js worker on AICGEN00 — the droplet that already runs Shion — serves both entry
-points. LiveKit Cloud owns the phone number, SIP, WebRTC media, and model inference.
+One Node.js worker on AICGEN00 — the droplet that already runs Shion — serves the browser entry
+point. LiveKit Cloud owns WebRTC media and model inference. There is no phone entry point; it
+was cut to avoid the cost of a number (see `scope.md`).
 
 ```
-call or browser -> room -> dispatch rule requests agentName "on-call"
+browser -> room -> token dispatch requests agentName "on-call"
   -> worker joins over LiveKit's WebSocket
   -> LiveKit Inference (STT -> LLM -> TTS)
   -> checkServers | sendAlert -> Shion :3300 -> Discord DM
@@ -15,8 +16,7 @@ call or browser -> room -> dispatch rule requests agentName "on-call"
 | Agent worker  | `agent-starter-node` on `agents-js`    | Instructions, model choices, `agentName`, tools                      |
 | Health tool   | new code                               | `checkServers` over `HEALTH_TARGETS`, including Shion's `/v1/status` |
 | Alert tool    | new code + Shion                       | `sendAlert` to `${SHION_URL}/v1/messages`, confirm before sending    |
-| Phone entry   | LiveKit Phone Number + dispatch rule   | Buy the number, one JSON rule, caller allowlist                      |
-| Browser entry | LiveKit sandbox or agents playground   | Nothing to build                                                     |
+| Browser entry | LiveKit Meet via `lk token create`     | Nothing to build; the token requests the agent by name               |
 | Deploy        | starter Dockerfile + your compose file | Image push, compose service, env file                                |
 
 ## Tools
@@ -118,17 +118,13 @@ automated publish is a possible follow-up, not a scope item.
 - **A local `pnpm run dev` worker still running steals calls from the droplet worker.** The
   failure looks random because routing depends on which worker registered last. Stop it before
   testing the droplet, or use a second LiveKit project for dev.
-- **Explicit dispatch breaks the browser path.** Once the worker has an `agentName`, rooms no
-  longer get an agent automatically, so the browser sandbox may stop working. Configure the
-  frontend or sandbox to request the agent by name, and retest the browser path after adding
-  the phone number. `src/main.ts` already sets `agentName: 'on-call'`.
-- **The caller number leaks into logs.** Individual dispatch rules name rooms after the caller's
-  number. Fine for a personal project.
+- **Explicit dispatch breaks automatic joins.** `src/main.ts` sets `agentName: 'on-call'`, so
+  rooms no longer get an agent automatically and a plain sandbox room stays empty. The browser
+  path works by minting a token that requests the agent by name; see step 5 of the deploy
+  runbook in `commands.md`.
 - **Sizing.** LiveKit's 4 cores / 8 GB per worker figure is for 10–25 concurrent jobs; one call
   needs far less. Check free memory on AICGEN00 before deploying and watch `docker stats` on the
   first call, since an OOM kill would take Shion down with it.
-- **The number is public.** Anyone who dials it can trigger a page. Guard with a caller
-  allowlist (or a dispatch-rule `pin`) plus confirm-before-send.
 - **`HEALTH_TARGETS` is one line.** dotenv does not parse multi-line values, so a pretty-printed
   JSON array silently becomes invalid JSON. The config loader reports the parse position rather
   than failing silently, and the agent says the check is unconfigured rather than inventing a
