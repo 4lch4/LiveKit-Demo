@@ -1,6 +1,6 @@
 # On-Call Voice Agent
 
-A LiveKit voice agent reachable from a browser or a phone number: ask "is anything broken?",
+A LiveKit voice agent reachable from a browser: ask "is anything broken?",
 and page the owner through Shion on request.
 
 This repo is a single pnpm project: planning notes under `docs/agents/`, the agent at the root.
@@ -10,7 +10,7 @@ This repo is a single pnpm project: planning notes under `docs/agents/`, the age
 
 | Doc                                   | Covers                                                          |
 | ------------------------------------- | --------------------------------------------------------------- |
-| `docs/agents/scope.md`                | The five boxes, the binding cut list, what is out of scope      |
+| `docs/agents/scope.md`                | The four boxes, the binding cut list, what is out of scope      |
 | `docs/agents/architecture.md`         | Worker/tool design, model budget, compose + deploy requirements |
 | `docs/agents/commands.md`             | Toolchain setup, `lk` install, bootstrap, test, deploy commands |
 | `docs/agents/shion-contract.md`       | The exact Shion API the alert tool posts to                     |
@@ -67,11 +67,12 @@ overrides it, and do not run `git commit` with explicit `--author` or `-c user.n
 ## Rules that get violated if ignored
 
 - **Agent work goes on a branch, merged to `main` by PR only.** See "Git workflow" above.
-- Scope is fixed. Five boxes, one resume claim each. Do not build outside them, and do not tick
-  a box that has not been verified end to end (a real WebRTC session, a real inbound call, a DM
-  that actually landed in Discord).
-- Never cut the droplet deploy, the phone call, or the Shion alert tool. Cut top-down from the
-  table in `docs/agents/scope.md` instead.
+- Scope is fixed. Four boxes, one resume claim each. Do not build outside them, and do not tick
+  a box that has not been verified end to end (a real WebRTC session, a DM that actually landed
+  in Discord).
+- The phone number is cut, to avoid its cost. Do not buy a number or add SIP dispatch rules.
+- Never cut the droplet deploy or the Shion alert tool. Cut top-down from the table in
+  `docs/agents/scope.md` instead.
 - No changes to Shion (`4lch4/Shion`, checkout at `/home/alcha/Development/Projects/Shion/Bot`).
   Its API already fits the alert tool. If you think Shion needs a change, you have misread the
   contract.
@@ -110,15 +111,14 @@ Anything installed via apt that was not in Ubuntu's own archive may be missing o
 - **The starter's `pnpm run dev` is `lk agent dev`, and it registers with LiveKit Cloud.** A local
   worker left running steals calls from the droplet worker, and routing depends on which worker
   registered last, so the failure looks random. Stop it before testing the droplet.
-- Adding an explicit `agentName` dispatch stops rooms from getting an agent automatically, which
-  can break the browser path. Reconfigure the sandbox/playground to request the agent by name,
-  and retest the browser path after adding the phone number.
+- The worker sets `agentName: 'on-call'`, so rooms do not get an agent automatically. A browser
+  session needs a token that requests it, e.g. `lk token create --agent on-call --open meet`
+  (see the deploy runbook in `docs/agents/commands.md`).
 - Inference runs on a $2.50 credit budget, so model choice buys test minutes. The shipped default
   in `src/agent.ts` is `google/gemma-4-31b-it` with Fish Audio TTS, roughly $0.015/min. The cheap
   combo in `docs/agents/architecture.md` is about $0.006/min, so roughly 400 minutes of talking.
   Every simulation run spends real credit too.
 - `lk agent simulate` runs against LiveKit Cloud with real inference, which is why the starter's
   Simulations workflow is gated to merges on `main` and not run on every push.
-- The phone number is public. Anyone who dials it can trigger a page.
 - The agent and Shion share AICGEN00. Set `mem_limit` in compose so an OOM cannot take Shion
   down.
