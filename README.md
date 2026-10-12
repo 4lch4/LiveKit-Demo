@@ -4,13 +4,6 @@ This repository is home to my demo deployment of an agent using LiveKit. It's a 
 
 I'm creating it with the intention of learning and experimenting with Claude Code, OpenCode, and T3 Code. I'm using Claude for the idea generation and planning, OpenCode for the coding and implementation, and T3 Code for testing with the new Orchestrator v2. The project is structured to be modular, allowing for easy updates and improvements as I learn more about LiveKit and voice agent development.
 
-## Demo
-
-<!-- TODO: link the 60-90 second recording here once it's uploaded. -->
-
-_Recording coming soon:_ a browser session asks "is anything broken?", hears live health data,
-then says "page me about it" and the page lands as a Discord DM.
-
 ## What it does
 
 Open a browser session and talk to it:
