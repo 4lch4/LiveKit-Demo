@@ -97,9 +97,10 @@ Four boxes, each verified end to end before being ticked; see
 - [x] A browser (WebRTC) session is answered with live health data
 - [x] Saying "page me about it" triggers a tool call that posts to Shion and lands in Discord
 - [x] The worker runs in Docker on the droplet and restarts on its own
-- [ ] A public GitHub repo has a README, architecture diagram, and a 60-90 second demo recording
+- [x] A public GitHub repo has a README and an architecture diagram
 
-A phone number over SIP was cut to avoid its recurring cost. Nothing in the agent depends on the
-browser specifically, so adding one later is a number plus a dispatch rule.
+Two items from the original plan were cut: a phone number over SIP, to avoid its recurring cost,
+and a demo recording. Nothing in the agent depends on the browser specifically, so adding a number
+later is a number plus a dispatch rule.
 
 [0]: https://github.com/4lch4/Shion

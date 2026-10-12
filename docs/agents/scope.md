@@ -10,11 +10,11 @@ resume.
 - [x] A browser (WebRTC) session is answered with live health data
 - [x] Saying "page me about it" triggers a tool call that posts to Shion and lands in Discord
 - [x] The worker runs in Docker on the droplet and restarts on its own
-- [ ] A public GitHub repo has a README, architecture diagram, and a 60-90 second demo
-      recording
+- [x] A public GitHub repo has a README and an architecture diagram
 
 The plan had a fifth box, a real phone number reaching the same agent over SIP. The owner cut it
-on 2026-10-12 to avoid the cost of a number. See "Out of scope".
+on 2026-10-12 to avoid the cost of a number, and the fourth box dropped its demo recording the
+same day. See "Out of scope".
 
 ## Rules
 
@@ -48,6 +48,8 @@ Deploy to LiveKit Cloud with `lk agent create` instead and change the bullet fro
   allowlist or `pin`, since the number would be public. Do not claim telephony on the resume.
 - **Outbound calls** ("call me when something breaks"). These need a SIP trunk, which falls
   under the phone cut above.
+- **A demo recording.** The fourth box originally asked for a 60-90 second recording alongside
+  the README and diagram. The owner cut it on 2026-10-12. Do not claim a demo video on the resume.
 - **Changes to Shion.** Its API already fits the alert tool; nothing in `4lch4/Shion` needs to
   change.
 
