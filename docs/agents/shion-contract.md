@@ -10,10 +10,10 @@ agent container.
 | Item                              | Value                                                                                                                    |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | Base URL from the agent container | `http://host.docker.internal:3300`                                                                                       |
-| Send                              | `POST /v1/messages` with `{ "source", "level", "text" }`                                                                 |
+| Send                              | `POST /v1/notifications` with `{ "source", "level", "text" }`                                                            |
 | Fields                            | `source` 1–64 chars (use `on-call-agent`); `level` `info`, `warning` or `critical`, default `info`; `text` 1–2,000 chars |
 | Auth                              | `Authorization: Bearer <API_TOKEN>` on every `/v1` route                                                                 |
-| Success                           | `200` with `"status":"delivered"`; the Message arrives as a Discord DM to you                                            |
+| Success                           | `200` with `"status":"delivered"`; the Notification arrives as a Discord DM to you                                       |
 | Failures                          | `401` bad token, `422` schema mismatch, `502` accepted but Discord refused (body carries Discord's code)                 |
 | Health                            | `GET /v1/status` returns `ready` or `degraded`                                                                           |
 
@@ -25,6 +25,11 @@ agent container.
   the `/v1/status` target also needs the bearer header
 
 Add Shion's own `/v1/status` to `HEALTH_TARGETS` so the agent can report on Shion itself.
+
+`POST /v1/notifications` needs Shion 0.3.0 or newer. From that release Shion calls the payload a
+Notification rather than a Message; the request body, the bearer token and the response are
+unchanged. `POST /v1/messages` still works as a deprecated alias, but Shion will remove it in a
+later release, so the alert tool does not use it.
 
 Keep the URL in `SHION_URL` rather than hardcoding it in the tool, so moving either service
 later is a config change instead of a code change.

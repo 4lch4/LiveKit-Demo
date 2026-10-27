@@ -11,13 +11,13 @@ browser -> room -> token dispatch requests agentName "on-call"
   -> checkServers | sendAlert -> Shion :3300 -> Discord DM
 ```
 
-| Component     | Built from                             | Your work                                                            |
-| ------------- | -------------------------------------- | -------------------------------------------------------------------- |
-| Agent worker  | `agent-starter-node` on `agents-js`    | Instructions, model choices, `agentName`, tools                      |
-| Health tool   | new code                               | `checkServers` over `HEALTH_TARGETS`, including Shion's `/v1/status` |
-| Alert tool    | new code + Shion                       | `sendAlert` to `${SHION_URL}/v1/messages`, confirm before sending    |
-| Browser entry | LiveKit Meet via `lk token create`     | Nothing to build; the token requests the agent by name               |
-| Deploy        | starter Dockerfile + your compose file | Image push, compose service, env file                                |
+| Component     | Built from                             | Your work                                                              |
+| ------------- | -------------------------------------- | ---------------------------------------------------------------------- |
+| Agent worker  | `agent-starter-node` on `agents-js`    | Instructions, model choices, `agentName`, tools                        |
+| Health tool   | new code                               | `checkServers` over `HEALTH_TARGETS`, including Shion's `/v1/status`   |
+| Alert tool    | new code + Shion                       | `sendAlert` to `${SHION_URL}/v1/notifications`, confirm before sending |
+| Browser entry | LiveKit Meet via `lk token create`     | Nothing to build; the token requests the agent by name                 |
+| Deploy        | starter Dockerfile + your compose file | Image push, compose service, env file                                  |
 
 ## Tools
 
@@ -29,8 +29,9 @@ Define both with `llm.tool` + zod.
   Entries need an optional `headers` field so the Shion target can send its bearer token. **Done.**
 - **`sendAlert`** — built, in `src/tools/`. Zod params `level` (`info` / `warning` / `critical`,
   defaulting to `info` like Shion) and `text` (max 2,000 chars). POSTs
-  `{ source: "on-call-agent", level, text }` to `${SHION_URL}/v1/messages` with the bearer token
-  and a 5-second timeout, treating only a 200 carrying `"status":"delivered"` as a delivery.
+  `{ source: "on-call-agent", level, text }` to `${SHION_URL}/v1/notifications` with the
+  bearer token and a 5-second timeout, treating only a 200 carrying `"status":"delivered"` as a
+  delivery.
   401, 422 and 502 each map to a short spoken error. `SHION_URL` and `SHION_API_TOKEN` load
   through their own `loadShionConfig`, so paging works even when `HEALTH_TARGETS` is unset.
   **Done.**

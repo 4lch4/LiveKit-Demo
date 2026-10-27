@@ -31,8 +31,8 @@ export type SendAlertResult =
  * so a trailing slash in `SHION_URL` cannot produce a doubled separator. A base
  * with a path prefix keeps it, since the relative join is resolved against it.
  */
-function messagesUrl(baseUrl: string): string {
-  return new URL('v1/messages', baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`).toString();
+function notificationsUrl(baseUrl: string): string {
+  return new URL('v1/notifications', baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`).toString();
 }
 
 /**
@@ -56,7 +56,7 @@ export async function sendAlert(
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    const response = await fetch(messagesUrl(config.url), {
+    const response = await fetch(notificationsUrl(config.url), {
       method: 'POST',
       headers: {
         'user-agent': USER_AGENT,
