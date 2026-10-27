@@ -40,7 +40,7 @@ flowchart LR
     agent <-->|"STT / LLM / TTS"| inference
     agent -->|"checkServers"| targets
     agent -->|"checkServers"| shion
-    agent -->|"sendAlert<br/>POST /v1/messages"| shion
+    agent -->|"sendAlert<br/>POST /v1/notifications"| shion
     shion --> discord
 ```
 
