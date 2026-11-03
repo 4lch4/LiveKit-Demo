@@ -8,8 +8,17 @@ name: Simulations
 # LIVEKIT_API_SECRET. Until those are set this workflow fails at the first
 # inference call, so check `gh secret list` before trusting a red run here.
 on:
+  # main only moves through merged pull requests, so this runs once per merge, and only for a
+  # merge that can change what the agent does. Docs-only merges skip it and spend no credit.
   push:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'scenarios.yaml'
+      - 'scenarios/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/simulations.yml'
   # A manual run can swap the agent's LLM and sample each scenario three times, to tell a
   # model-capability failure apart from an instruction gap or a flaky verdict. Merges to main
   # always test the deployed default model with one sample.
