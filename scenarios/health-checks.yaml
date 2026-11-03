@@ -23,9 +23,9 @@ scenarios:
       2. If the agent asks a follow-up question, answer it briefly.
       3. Once you have a clear status, say "thanks" and end the conversation.
     agent_expectations: >
-      Calls the checkServers tool and then reports the result in plain spoken
-      prose. States how many servers are healthy out of how many are being
-      checked, using the actual numbers from the tool rather than invented ones.
+      Answers from the checkServers tool's result, in plain spoken prose. States
+      how many servers are healthy out of how many are being checked, using the
+      actual numbers from the tool rather than invented ones.
       If any server is unhealthy, names which one and what went wrong. Does not
       recite raw JSON, URLs, or tool names. Three sentences or fewer.
     tags:

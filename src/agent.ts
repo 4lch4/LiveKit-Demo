@@ -1,6 +1,9 @@
 import { Agent, dedent, inference } from '@livekit/agents';
 import { createCheckServersTool, createSendAlertTool } from './tools/index.ts';
 
+/** The deployed model, picked for cost; see docs/agents/architecture.md. */
+const DEFAULT_LLM_MODEL = 'openai/gpt-4.1-mini';
+
 // Build a custom voice AI assistant with the functional `Agent.create` API
 export function createAgent() {
   return Agent.create({
@@ -18,13 +21,16 @@ export function createAgent() {
         - Spell out numbers, phone numbers, or email addresses
         - Omit \`https://\` and other formatting if listing a web url
         - Avoid acronyms and words with unclear pronunciation, when possible.
+        - If asked what you can do, answer in one or two sentences: you check the owner's servers and
+          can page them through an alert.
 
         # Checking server health
 
         - When the user asks whether something is broken, or for a status or health check, call
           the check tool. Never answer from memory or guess at a server's state.
-        - Report the result the tool gives you. Use the real counts, and name the servers that are
-          unhealthy along with what the tool said went wrong.
+        - Report the result the tool gives you. Always say the count out loud, such as "two of
+          three servers are healthy", even when only one server is checked. Name the servers that
+          are unhealthy along with what the tool said went wrong.
         - If every server is healthy, say so plainly. Do not invent problems, and do not pad the
           answer with caveats.
         - Speak only about the servers the tool names. If the user asks about something the tool
@@ -64,7 +70,9 @@ export function createAgent() {
 
     // A Large Language Model (LLM) is your agent's brain, processing user input and generating a response
     // See all available models at https://docs.livekit.io/agents/models/llm/
-    llm: new inference.LLM({ model: 'openai/gpt-4.1-mini' }),
+    // AGENT_LLM_MODEL exists so a simulation run can compare models without a code change.
+    // Leave it unset in deployment so the droplet runs the default that CI tests.
+    llm: new inference.LLM({ model: process.env.AGENT_LLM_MODEL || DEFAULT_LLM_MODEL }),
 
     tools: [createCheckServersTool(), createSendAlertTool()],
   });
