@@ -57,6 +57,11 @@ export function createCheckServersTool() {
       report them as given. The result names every server that was checked. If
       the user asked about something not named there, it is not monitored: say
       so, and never report another server's result as if it were that one.
+
+      Each result is a snapshot from the moment of the call. If the user asks you
+      to check again, asks whether you are sure, or asks for the current status
+      after an earlier check, call this tool again. Never present an earlier
+      result as a new check.
     `,
     parameters: z.object({}),
     execute: async () => {
