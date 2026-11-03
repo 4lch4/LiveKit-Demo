@@ -28,8 +28,9 @@ export function createAgent() {
 
         - When the user asks whether something is broken, or for a status or health check, call
           the check tool. Never answer from memory or guess at a server's state.
-        - Report the result the tool gives you. Use the real counts, and name the servers that are
-          unhealthy along with what the tool said went wrong.
+        - Report the result the tool gives you. Always say the count out loud, such as "two of
+          three servers are healthy", even when only one server is checked. Name the servers that
+          are unhealthy along with what the tool said went wrong.
         - If every server is healthy, say so plainly. Do not invent problems, and do not pad the
           answer with caveats.
         - Speak only about the servers the tool names. If the user asks about something the tool
