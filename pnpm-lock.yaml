@@ -168,10 +168,10 @@ importers:
     dependencies:
       '@livekit/agents':
         specifier: ^1.9.0
-        version: 1.9.1(@livekit/rtc-node@0.13.35)(@types/node@24.19.1)(supports-color@7.2.0)(typescript@5.9.3)(zod@4.6.5)
+        version: 1.9.1(@livekit/rtc-node@0.13.35)(@types/node@24.19.1)(supports-color@7.2.0)(typescript@5.9.3)(zod@4.6.6)
       '@livekit/plugins-ai-coustics':
         specifier: ^0.3.2
-        version: 0.3.2(@livekit/agents@1.9.1(@livekit/rtc-node@0.13.35)(@types/node@24.19.1)(supports-color@7.2.0)(typescript@5.9.3)(zod@4.6.5))(@livekit/rtc-node@0.13.35)
+        version: 0.3.2(@livekit/agents@1.9.1(@livekit/rtc-node@0.13.35)(@types/node@24.19.1)(supports-color@7.2.0)(typescript@5.9.3)(zod@4.6.6))(@livekit/rtc-node@0.13.35)
       '@livekit/rtc-node':
         specifier: ^0.13.35
         version: 0.13.35
@@ -179,8 +179,8 @@ importers:
         specifier: ^17.4.2
         version: 17.4.2
       zod:
-        specifier: ^4.6.5
-        version: 4.6.5
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@eslint/js':
         specifier: ^9.39.5
@@ -2054,8 +2054,8 @@ packages:
     peerDependencies:
       zod: ^3.25.28 || ^4
 
-  zod@4.6.5:
-    resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
+  zod@4.6.6:
+    resolution: {integrity: sha512-4UmzQUF5fxvfcYHlbjBmejU+w+hbDnWFx4aS8kBx7nPBHcO2SqPbpAG8snbdg+Xse4pRefR98hgjFgIMCI/UhA==}
 
 snapshots:
 
@@ -2297,7 +2297,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  '@livekit/agents@1.9.1(@livekit/rtc-node@0.13.35)(@types/node@24.19.1)(supports-color@7.2.0)(typescript@5.9.3)(zod@4.6.5)':
+  '@livekit/agents@1.9.1(@livekit/rtc-node@0.13.35)(@types/node@24.19.1)(supports-color@7.2.0)(typescript@5.9.3)(zod@4.6.6)':
     dependencies:
       '@bufbuild/protobuf': 1.10.1
       '@livekit/av': 10.0.0
@@ -2330,14 +2330,14 @@ snapshots:
       jsonrepair: 3.15.0
       livekit-server-sdk: 2.19.1
       ofetch: 1.5.1
-      openai: 6.49.0(ws@8.22.0)(zod@4.6.5)
+      openai: 6.49.0(ws@8.22.0)(zod@4.6.6)
       pidusage: 4.0.1
       pino: 8.21.0
       pino-pretty: 11.3.0
       sharp: 0.35.4(@types/node@24.19.1)
       ws: 8.22.0
-      zod: 4.6.5
-      zod-to-json-schema: 3.25.2(zod@4.6.5)
+      zod: 4.6.6
+      zod-to-json-schema: 3.25.2(zod@4.6.6)
     transitivePeerDependencies:
       - '@aws-sdk/credential-provider-node'
       - '@smithy/hash-node'
@@ -2413,9 +2413,9 @@ snapshots:
   '@livekit/plugins-ai-coustics-x86_64-unknown-linux-gnu@0.3.2':
     optional: true
 
-  '@livekit/plugins-ai-coustics@0.3.2(@livekit/agents@1.9.1(@livekit/rtc-node@0.13.35)(@types/node@24.19.1)(supports-color@7.2.0)(typescript@5.9.3)(zod@4.6.5))(@livekit/rtc-node@0.13.35)':
+  '@livekit/plugins-ai-coustics@0.3.2(@livekit/agents@1.9.1(@livekit/rtc-node@0.13.35)(@types/node@24.19.1)(supports-color@7.2.0)(typescript@5.9.3)(zod@4.6.6))(@livekit/rtc-node@0.13.35)':
     dependencies:
-      '@livekit/agents': 1.9.1(@livekit/rtc-node@0.13.35)(@types/node@24.19.1)(supports-color@7.2.0)(typescript@5.9.3)(zod@4.6.5)
+      '@livekit/agents': 1.9.1(@livekit/rtc-node@0.13.35)(@types/node@24.19.1)(supports-color@7.2.0)(typescript@5.9.3)(zod@4.6.6)
       '@livekit/rtc-node': 0.13.35
       '@ubjs/core': 0.31.0-5
       '@ubjs/node': 0.31.0-5
@@ -3380,10 +3380,10 @@ snapshots:
     dependencies:
       wrappy: 1.0.2
 
-  openai@6.49.0(ws@8.22.0)(zod@4.6.5):
+  openai@6.49.0(ws@8.22.0)(zod@4.6.6):
     optionalDependencies:
       ws: 8.22.0
-      zod: 4.6.5
+      zod: 4.6.6
 
   optionator@0.9.4:
     dependencies:
@@ -3779,8 +3779,8 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod-to-json-schema@3.25.2(zod@4.6.5):
+  zod-to-json-schema@3.25.2(zod@4.6.6):
     dependencies:
-      zod: 4.6.5
+      zod: 4.6.6
 
-  zod@4.6.5: {}
+  zod@4.6.6: {}
