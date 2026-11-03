@@ -10,16 +10,56 @@ import {
 import { checkAllTargets } from './check-servers.ts';
 import { sendAlert } from './send-alert.ts';
 
+/** Words that name a kind of thing rather than which thing, so they never decide a match. */
+const GENERIC_WORDS = new Set(['the', 'my', 'our', 'service', 'services', 'server', 'servers']);
+
+function nameTokens(name: string): string[] {
+  return name
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((t) => t && !GENERIC_WORDS.has(t));
+}
+
+/**
+ * Whether a name the user asked about refers to a configured target. The model
+ * supplies the name in the user's words; code decides membership, so a service
+ * that is not configured is reported as such instead of being left for the
+ * model to map onto whichever target looks closest.
+ */
+function isMonitored(askedName: string, results: HealthCheckResult[]): boolean {
+  const asked = nameTokens(askedName);
+  if (asked.length === 0) return true; // e.g. "the servers": a general question, not a name
+  return results.some((r) => {
+    const target = nameTokens(r.name);
+    return (
+      asked.every((t) => target.includes(t)) ||
+      (target.length > 0 && target.every((t) => asked.includes(t)))
+    );
+  });
+}
+
 /**
  * Renders results as one spoken line. Kept short deliberately: the agent
  * paraphrases this, and a long return value bloats the context window on a
  * voice turn where every token is latency.
  */
-function summarize(results: HealthCheckResult[]): string {
+function summarize(results: HealthCheckResult[], askedAbout: string[] = []): string {
   if (results.length === 0) {
     return 'No health targets are configured.';
   }
 
+  // Leads the summary so it is the first fact the model reads, before any
+  // unhealthy target it might otherwise attach the user's question to.
+  const unmonitored = askedAbout.filter((name) => !isMonitored(name, results));
+  const notMonitored =
+    unmonitored.length > 0
+      ? `Not monitored, so there is no result for: ${unmonitored.join(', ')}. ` +
+        `None of the results below are about ${unmonitored.length === 1 ? 'it' : 'them'}. `
+      : '';
+  return notMonitored + summarizeChecked(results);
+}
+
+function summarizeChecked(results: HealthCheckResult[]): string {
   const healthy = results.filter((r) => r.healthy);
   const broken = results.filter((r) => !r.healthy);
   const head = `${healthy.length} of ${results.length} healthy`;
@@ -58,13 +98,25 @@ export function createCheckServersTool() {
       the user asked about something not named there, it is not monitored: say
       so, and never report another server's result as if it were that one.
 
+      When the user names a specific service, such as "is billing up?", pass that
+      name in askedAbout. The result then starts by saying whether it is
+      monitored; if it is not, answer that first and do not tie any other
+      server's result to it.
+
       Each result is a snapshot from the moment of the call. If the user asks you
       to check again, asks whether you are sure, or asks for the current status
       after an earlier check, call this tool again. Never present an earlier
       result as a new check.
     `,
-    parameters: z.object({}),
-    execute: async () => {
+    parameters: z.object({
+      askedAbout: z
+        .array(z.string())
+        .default([])
+        .describe(
+          'Specific services or servers the user named, in their words, e.g. ["billing service"]. Empty for a general question like "is anything broken".',
+        ),
+    }),
+    execute: async ({ askedAbout }) => {
       let config: ReturnType<typeof loadHealthConfig>;
       try {
         config = loadHealthConfig();
@@ -78,7 +130,7 @@ export function createCheckServersTool() {
       }
 
       const results = await checkAllTargets(config.targets as HealthTarget[]);
-      return summarize(results);
+      return summarize(results, askedAbout);
     },
   });
 }
