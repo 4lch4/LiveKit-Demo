@@ -35,6 +35,6 @@
     "@livekit/plugins-ai-coustics": "^0.3.2",
     "@livekit/rtc-node": "^0.13.35",
     "dotenv": "^17.4.2",
-    "zod": "^4.6.5"
+    "zod": "^4.6.6"
   }
 }
