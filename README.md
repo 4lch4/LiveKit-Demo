@@ -115,9 +115,9 @@ simulated user holds a conversation and an LLM judge grades it against written e
 [`scenarios.yaml`](scenarios.yaml) holds three general cases from the `agent-starter-node`
 template: greeting, not inventing personal facts, and declining a harmful request.
 
-All three files run in the [Simulations workflow](.github/workflows/simulations.yml) on merges to
-`main`. CI has two health targets, one of them unhealthy on purpose, so the problem-reporting path
-is exercised. It has no Shion credentials, so there `sendAlert` returns "not configured" and the
+All three files run in the [Simulations workflow](.github/workflows/simulations.yml) when a merge
+to `main` changes the agent or its scenarios. CI has two health targets, one of them unhealthy on
+purpose, so the problem-reporting path is exercised. It has no Shion credentials, so there `sendAlert` returns "not configured" and the
 alert scenarios check that the agent reports that failure truthfully. A real send was tested by
 hand against Shion.
 
