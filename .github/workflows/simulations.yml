@@ -10,6 +10,13 @@ name: Simulations
 on:
   push:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'scenarios.yaml'
+      - 'scenarios/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/simulations.yml'
   # A manual run can swap the agent's LLM and sample each scenario three times, to tell a
   # model-capability failure apart from an instruction gap or a flaky verdict. Merges to main
   # always test the deployed default model with one sample.
