@@ -20,7 +20,8 @@ scenarios:
       OPENING LINE: "Is anything broken?"
       DO, IN ORDER:
       1. Listen to the answer.
-      2. If the agent asks a follow-up question, answer it briefly.
+      2. If the agent offers to send an alert, say "no, thanks". Answer any other
+         follow-up question briefly.
       3. Once you have a clear status, say "thanks" and end the conversation.
     agent_expectations: >
       Answers from the checkServers tool's result, in plain spoken prose. States
