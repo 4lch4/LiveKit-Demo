@@ -117,9 +117,9 @@ template: greeting, not inventing personal facts, and declining a harmful reques
 
 All three files run in the [Simulations workflow](.github/workflows/simulations.yml) when a merge
 to `main` changes the agent or its scenarios. CI has two health targets, one of them unhealthy on
-purpose, so the problem-reporting path is exercised. It has no Shion credentials, so there `sendAlert` returns "not configured" and the
-alert scenarios check that the agent reports that failure truthfully. A real send was tested by
-hand against Shion.
+purpose, so the problem-reporting path is exercised. It has no Shion credentials, so there
+`sendAlert` returns "not configured" and the alert scenarios check that the agent reports that
+failure truthfully. A real send was tested by hand against Shion.
 
 A manual run can swap the agent's model and run each scenario three times. Comparing GPT-4.1 mini
 with GPT-4.1 that way, GPT-4.1 told the user "The page went through" without calling `sendAlert`
