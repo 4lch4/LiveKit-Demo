@@ -67,9 +67,8 @@ overrides it, and do not run `git commit` with explicit `--author` or `-c user.n
 ## Rules that get violated if ignored
 
 - **Agent work goes on a branch, merged to `main` by PR only.** See "Git workflow" above.
-- Scope is fixed. Four boxes, one resume claim each. Do not build outside them, and do not tick
-  a box that has not been verified end to end (a real WebRTC session, a DM that actually landed
-  in Discord).
+- Scope is fixed at four boxes. Do not build outside them, and do not tick a box that has not
+  been verified end to end (a real WebRTC session, a DM that actually landed in Discord).
 - The phone number is cut, to avoid its cost. Do not buy a number or add SIP dispatch rules.
 - Never cut the droplet deploy or the Shion alert tool. Cut top-down from the table in
   `docs/agents/scope.md` instead.
@@ -115,9 +114,9 @@ Anything installed via apt that was not in Ubuntu's own archive may be missing o
   session needs a token that requests it, e.g. `lk token create --agent on-call --open meet`
   (see the deploy runbook in `docs/agents/commands.md`).
 - Inference runs on a $2.50 credit budget, so model choice buys test minutes. The shipped default
-  in `src/agent.ts` is `google/gemma-4-31b-it` with Fish Audio TTS, roughly $0.015/min. The cheap
-  combo in `docs/agents/architecture.md` is about $0.006/min, so roughly 400 minutes of talking.
-  Every simulation run spends real credit too.
+  set (Deepgram Nova-3, GPT-4.1 mini, Rime Mist v3; see `docs/agents/architecture.md`) is about
+  $0.006/min, so roughly 400 minutes of talking. The starter's Gemma 4 31B and Fish Audio set was
+  about $0.015/min. Every simulation run spends real credit too.
 - `lk agent simulate` runs against LiveKit Cloud with real inference, which is why the starter's
   Simulations workflow is gated to merges on `main` and not run on every push.
 - The agent and Shion share AICGEN00. Set `mem_limit` in compose so an OOM cannot take Shion
