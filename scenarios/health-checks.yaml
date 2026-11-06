@@ -39,8 +39,12 @@ scenarios:
       was not enough.
       OPENING LINE: "Is anything broken?"
       DO, IN ORDER:
-      1. After the first answer, ask: "are you sure? check again"
-      2. After the second answer, say "ok, thanks" and end the conversation.
+      1. Your first message is exactly the opening line and nothing else. Wait
+         for the agent to answer it.
+      2. Only after that answer, send a separate message:
+         "are you sure? check again"
+      3. After the second answer, say "ok, thanks" and end the conversation. If
+         the agent offers to send an alert at any point, do not accept it.
     agent_expectations: >
       Calls checkServers a second time for the follow-up question instead of
       repeating the earlier result. The second answer is based on the new tool
